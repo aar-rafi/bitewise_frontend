@@ -28,19 +28,23 @@ const Index = () => {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-md animate-fade-in">
-          {/* Logo/Brand Section */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-nutrition-green to-nutrition-emerald rounded-full mb-4 shadow-lg">
-              <Apple className="w-8 h-8 text-white" />
+      <div className="relative z-10 min-h-screen flex">
+        {/* Left side - Space for animations */}
+        <div className="flex-1 flex items-center justify-center p-4">
+          {/* This space is reserved for your animations */}
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-nutrition-green to-nutrition-emerald rounded-full mb-6 shadow-lg">
+              <Apple className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-nutrition-green to-nutrition-emerald bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-nutrition-green to-nutrition-emerald bg-clip-text text-transparent mb-4">
               NutriLife
             </h1>
-            <p className="text-gray-600 mt-2">Your personal nutrition companion</p>
+            <p className="text-gray-600 text-lg">Your personal nutrition companion</p>
           </div>
+        </div>
 
+        {/* Right side - Login Form */}
+        <div className="w-full max-w-md p-4 flex flex-col justify-center animate-fade-in">
           {/* Glass Login Card */}
           <Card className="backdrop-blur-lg bg-white/10 border border-white/20 shadow-2xl shadow-black/10 relative overflow-hidden">
             {/* Glass shimmer effect */}

@@ -8,13 +8,32 @@ import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Apple, Leaf, Heart } from 'lucide-react';
 
 const Index = () => {
+  const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt:', { email, password });
+    if (isSignUp) {
+      console.log('Signup attempt:', { fullName, email, password, confirmPassword });
+    } else {
+      console.log('Login attempt:', { email, password });
+    }
+  };
+
+  const toggleMode = () => {
+    setIsSignUp(!isSignUp);
+    // Reset form fields
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setFullName('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   };
 
   return (
@@ -43,22 +62,40 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Right side - Login Form */}
-        <div className="w-full max-w-md p-4 flex flex-col justify-center animate-fade-in">
-          {/* Glass Login Card */}
-          <Card className="backdrop-blur-lg bg-white/10 border border-white/20 shadow-2xl shadow-black/10 relative overflow-hidden">
+        {/* Right side - Login/Signup Form */}
+        <div className="w-full max-w-md p-4 flex flex-col justify-center">
+          {/* Glass Login/Signup Card */}
+          <Card className="backdrop-blur-lg bg-white/10 border border-white/20 shadow-2xl shadow-black/10 relative overflow-hidden transition-all duration-500 ease-in-out">
             {/* Glass shimmer effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-glass-shimmer"></div>
             
             <CardHeader className="space-y-1 text-center relative z-10">
-              <CardTitle className="text-2xl font-bold text-gray-800">Welcome Back</CardTitle>
-              <CardDescription className="text-gray-600">
-                Sign in to track your nutrition journey
+              <CardTitle className="text-2xl font-bold text-gray-800 transition-all duration-300">
+                {isSignUp ? 'Create Account' : 'Welcome Back'}
+              </CardTitle>
+              <CardDescription className="text-gray-600 transition-all duration-300">
+                {isSignUp ? 'Join us to start your nutrition journey' : 'Sign in to track your nutrition journey'}
               </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-6 relative z-10">
               <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Full Name Field - Only for Sign Up */}
+                <div className={`space-y-2 transition-all duration-300 overflow-hidden ${
+                  isSignUp ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'
+                }`}>
+                  <Label htmlFor="fullName" className="text-gray-700 font-medium">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30 focus:border-nutrition-green transition-all duration-300 placeholder:text-gray-500"
+                    required={isSignUp}
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
                   <Input
@@ -94,21 +131,56 @@ const Index = () => {
                   </div>
                 </div>
 
+                {/* Confirm Password Field - Only for Sign Up */}
+                <div className={`space-y-2 transition-all duration-300 overflow-hidden ${
+                  isSignUp ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'
+                }`}>
+                  <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">Confirm Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30 focus:border-nutrition-green transition-all duration-300 placeholder:text-gray-500 pr-10"
+                      required={isSignUp}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-nutrition-green transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Remember Me / Terms - Different for login vs signup */}
                 <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center space-x-2 text-gray-700">
-                    <input type="checkbox" className="rounded border-white/30 text-nutrition-green focus:ring-nutrition-green" />
-                    <span>Remember me</span>
-                  </label>
-                  <a href="#" className="text-nutrition-green hover:text-nutrition-emerald transition-colors font-medium">
-                    Forgot password?
-                  </a>
+                  {isSignUp ? (
+                    <label className="flex items-center space-x-2 text-gray-700">
+                      <input type="checkbox" className="rounded border-white/30 text-nutrition-green focus:ring-nutrition-green" required />
+                      <span>I agree to the Terms & Privacy Policy</span>
+                    </label>
+                  ) : (
+                    <>
+                      <label className="flex items-center space-x-2 text-gray-700">
+                        <input type="checkbox" className="rounded border-white/30 text-nutrition-green focus:ring-nutrition-green" />
+                        <span>Remember me</span>
+                      </label>
+                      <a href="#" className="text-nutrition-green hover:text-nutrition-emerald transition-colors font-medium">
+                        Forgot password?
+                      </a>
+                    </>
+                  )}
                 </div>
 
                 <Button 
                   type="submit" 
                   className="w-full bg-gradient-to-r from-nutrition-green to-nutrition-emerald hover:from-nutrition-emerald hover:to-nutrition-green transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                 >
-                  Sign In
+                  {isSignUp ? 'Create Account' : 'Sign In'}
                 </Button>
               </form>
 
@@ -137,10 +209,13 @@ const Index = () => {
               </div>
 
               <div className="text-center text-sm text-gray-600">
-                Don't have an account?{" "}
-                <a href="#" className="text-nutrition-green hover:text-nutrition-emerald transition-colors font-medium">
-                  Sign up for free
-                </a>
+                {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+                <button 
+                  onClick={toggleMode}
+                  className="text-nutrition-green hover:text-nutrition-emerald transition-colors font-medium underline"
+                >
+                  {isSignUp ? 'Sign in' : 'Sign up for free'}
+                </button>
               </div>
             </CardContent>
           </Card>

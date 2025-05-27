@@ -77,9 +77,14 @@ export default function Dashboard() {
   if (error) {
     return (
       <div className="container py-8">
-        <Alert variant="destructive" className="animate-fade-in">
+        <Alert
+          variant="destructive"
+          className="animate-fade-in bg-red-500/20 border-red-500/30"
+        >
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Failed to load nutritional data</AlertDescription>
+          <AlertDescription className="text-red-200">
+            Failed to load nutritional data
+          </AlertDescription>
         </Alert>
       </div>
     );
@@ -91,14 +96,14 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="container py-8 space-y-8">
+    <div className="container py-8 pb-24 space-y-8 relative z-10">
       {/* Header */}
       <div className="flex justify-between items-center animate-fade-in">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-nutrition-green to-nutrition-emerald bg-clip-text text-transparent">
             Today's Summary
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-green-700/80 mt-1 font-medium">
             Track your nutritional journey
           </p>
         </div>
@@ -108,11 +113,11 @@ export default function Dashboard() {
       {/* Main Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
         {/* Calories Card with Glass Effect */}
-        <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-glass-shimmer" />
+        <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-400/30 to-orange-500/30 backdrop-blur-sm border-2 border-yellow-500/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-300/20 to-transparent animate-glass-shimmer" />
           <CardHeader className="pb-2 flex flex-row items-center space-y-0 space-x-2">
-            <Zap className="h-5 w-5 text-yellow-500" />
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <Zap className="h-6 w-6 text-yellow-700 drop-shadow-sm" />
+            <CardTitle className="text-sm font-bold text-yellow-900 drop-shadow-sm">
               Total Calories
             </CardTitle>
           </CardHeader>
@@ -121,11 +126,11 @@ export default function Dashboard() {
               <Skeleton className="h-8 w-24" />
             ) : (
               <>
-                <div className="text-3xl font-bold text-foreground">
+                <div className="text-3xl font-bold text-yellow-950 drop-shadow-sm">
                   <AnimatedNumber
                     value={data?.nutritional_summary.total_calories}
                     suffix=" kcal"
-                    className="text-3xl font-bold text-foreground"
+                    className="text-3xl font-bold text-yellow-950 drop-shadow-sm"
                   />
                 </div>
                 <Progress
@@ -133,9 +138,9 @@ export default function Dashboard() {
                     data?.nutritional_summary.total_calories,
                     dailyGoals.calories
                   )}
-                  className="h-2"
+                  className="h-3"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-yellow-800 font-medium drop-shadow-sm">
                   {Math.round(
                     calculateProgress(
                       data?.nutritional_summary.total_calories || "0",
@@ -150,9 +155,9 @@ export default function Dashboard() {
         </Card>
 
         {/* Protein Card */}
-        <Card className="relative overflow-hidden bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-green-400/30 to-emerald-500/30 border-2 border-green-500/50 hover:shadow-xl hover:shadow-green-500/25 transition-all duration-300 hover:scale-105">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-600 dark:text-green-400">
+            <CardTitle className="text-sm font-bold text-green-900 drop-shadow-sm">
               Protein
             </CardTitle>
           </CardHeader>
@@ -161,11 +166,11 @@ export default function Dashboard() {
               <Skeleton className="h-8 w-20" />
             ) : (
               <>
-                <div className="text-3xl font-bold text-green-700 dark:text-green-300">
+                <div className="text-3xl font-bold text-green-950 drop-shadow-sm">
                   <AnimatedNumber
                     value={data?.nutritional_summary.total_protein_g}
                     suffix="g"
-                    className="text-3xl font-bold text-green-700 dark:text-green-300"
+                    className="text-3xl font-bold text-green-950 drop-shadow-sm"
                   />
                 </div>
                 <Progress
@@ -173,7 +178,7 @@ export default function Dashboard() {
                     data?.nutritional_summary.total_protein_g,
                     dailyGoals.protein
                   )}
-                  className="h-2 bg-green-100 dark:bg-green-900"
+                  className="h-3 bg-green-200/50"
                 />
               </>
             )}
@@ -181,9 +186,9 @@ export default function Dashboard() {
         </Card>
 
         {/* Carbohydrates Card */}
-        <Card className="relative overflow-hidden bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-500/20 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-orange-400/30 to-red-500/30 border-2 border-orange-500/50 hover:shadow-xl hover:shadow-orange-500/25 transition-all duration-300 hover:scale-105">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-orange-600 dark:text-orange-400">
+            <CardTitle className="text-sm font-bold text-orange-900 drop-shadow-sm">
               Carbohydrates
             </CardTitle>
           </CardHeader>
@@ -192,11 +197,11 @@ export default function Dashboard() {
               <Skeleton className="h-8 w-20" />
             ) : (
               <>
-                <div className="text-3xl font-bold text-orange-700 dark:text-orange-300">
+                <div className="text-3xl font-bold text-orange-950 drop-shadow-sm">
                   <AnimatedNumber
                     value={data?.nutritional_summary.total_carbs_g}
                     suffix="g"
-                    className="text-3xl font-bold text-orange-700 dark:text-orange-300"
+                    className="text-3xl font-bold text-orange-950 drop-shadow-sm"
                   />
                 </div>
                 <Progress
@@ -204,7 +209,7 @@ export default function Dashboard() {
                     data?.nutritional_summary.total_carbs_g,
                     dailyGoals.carbs
                   )}
-                  className="h-2 bg-orange-100 dark:bg-orange-900"
+                  className="h-3 bg-orange-200/50"
                 />
               </>
             )}
@@ -212,9 +217,9 @@ export default function Dashboard() {
         </Card>
 
         {/* Fats Card */}
-        <Card className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-500/20 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-amber-400/30 to-yellow-500/30 border-2 border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/25 transition-all duration-300 hover:scale-105">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-amber-600 dark:text-amber-400">
+            <CardTitle className="text-sm font-bold text-amber-900 drop-shadow-sm">
               Fats
             </CardTitle>
           </CardHeader>
@@ -223,11 +228,11 @@ export default function Dashboard() {
               <Skeleton className="h-8 w-20" />
             ) : (
               <>
-                <div className="text-3xl font-bold text-amber-700 dark:text-amber-300">
+                <div className="text-3xl font-bold text-amber-950 drop-shadow-sm">
                   <AnimatedNumber
                     value={data?.nutritional_summary.total_fats_g}
                     suffix="g"
-                    className="text-3xl font-bold text-amber-700 dark:text-amber-300"
+                    className="text-3xl font-bold text-amber-950 drop-shadow-sm"
                   />
                 </div>
                 <Progress
@@ -235,7 +240,7 @@ export default function Dashboard() {
                     data?.nutritional_summary.total_fats_g,
                     dailyGoals.fats
                   )}
-                  className="h-2 bg-amber-100 dark:bg-amber-900"
+                  className="h-3 bg-amber-200/50"
                 />
               </>
             )}
@@ -246,10 +251,10 @@ export default function Dashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
         {/* Macronutrients Bar Chart */}
-        <Card className="col-span-1 lg:col-span-2 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+        <Card className="col-span-1 lg:col-span-2 bg-gradient-to-br from-slate-700/20 to-slate-800/30 backdrop-blur-sm border-2 border-slate-600/50 shadow-xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
+            <CardTitle className="flex items-center gap-2 text-slate-900 font-bold drop-shadow-sm">
+              <TrendingUp className="h-6 w-6 text-nutrition-green drop-shadow-sm" />
               Macronutrient Breakdown
             </CardTitle>
           </CardHeader>
@@ -277,9 +282,9 @@ export default function Dashboard() {
       {/* Secondary Nutrients */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
         {/* Fiber Card */}
-        <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/20">
+        <Card className="bg-gradient-to-br from-emerald-400/30 to-green-600/30 border-2 border-emerald-500/50 shadow-xl hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+            <CardTitle className="text-sm font-bold text-emerald-900 drop-shadow-sm">
               Fiber
             </CardTitle>
           </CardHeader>
@@ -288,11 +293,11 @@ export default function Dashboard() {
               <Skeleton className="h-8 w-20" />
             ) : (
               <>
-                <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                <div className="text-2xl font-bold text-emerald-950 drop-shadow-sm">
                   <AnimatedNumber
                     value={data?.nutritional_summary.total_fiber_g}
                     suffix="g"
-                    className="text-2xl font-bold text-emerald-700 dark:text-emerald-300"
+                    className="text-2xl font-bold text-emerald-950 drop-shadow-sm"
                   />
                 </div>
                 <Progress
@@ -300,7 +305,7 @@ export default function Dashboard() {
                     data?.nutritional_summary.total_fiber_g,
                     dailyGoals.fiber
                   )}
-                  className="h-2 bg-emerald-100 dark:bg-emerald-900"
+                  className="h-3 bg-emerald-200/50"
                 />
               </>
             )}
@@ -308,9 +313,9 @@ export default function Dashboard() {
         </Card>
 
         {/* Sugar Card */}
-        <Card className="bg-gradient-to-br from-rose-500/10 to-rose-500/5 border-rose-500/20">
+        <Card className="bg-gradient-to-br from-rose-400/30 to-pink-500/30 border-2 border-rose-500/50 shadow-xl hover:shadow-rose-500/25 transition-all duration-300 hover:scale-105">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-rose-600 dark:text-rose-400">
+            <CardTitle className="text-sm font-bold text-rose-900 drop-shadow-sm">
               Sugar
             </CardTitle>
           </CardHeader>
@@ -318,11 +323,11 @@ export default function Dashboard() {
             {isLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
-              <div className="text-2xl font-bold text-rose-700 dark:text-rose-300">
+              <div className="text-2xl font-bold text-rose-950 drop-shadow-sm">
                 <AnimatedNumber
                   value={data?.nutritional_summary.total_sugar_g}
                   suffix="g"
-                  className="text-2xl font-bold text-rose-700 dark:text-rose-300"
+                  className="text-2xl font-bold text-rose-950 drop-shadow-sm"
                 />
               </div>
             )}
@@ -330,10 +335,10 @@ export default function Dashboard() {
         </Card>
 
         {/* Water Card */}
-        <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
+        <Card className="bg-gradient-to-br from-blue-400/30 to-cyan-500/30 border-2 border-blue-500/50 shadow-xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105">
           <CardHeader className="pb-2 flex flex-row items-center space-y-0 space-x-2">
-            <Droplets className="h-4 w-4 text-blue-500" />
-            <CardTitle className="text-sm font-medium text-blue-600 dark:text-blue-400">
+            <Droplets className="h-5 w-5 text-blue-700 drop-shadow-sm" />
+            <CardTitle className="text-sm font-bold text-blue-900 drop-shadow-sm">
               Water
             </CardTitle>
           </CardHeader>
@@ -342,11 +347,11 @@ export default function Dashboard() {
               <Skeleton className="h-8 w-20" />
             ) : (
               <>
-                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                <div className="text-2xl font-bold text-blue-950 drop-shadow-sm">
                   <AnimatedNumber
                     value={data?.nutritional_summary.total_water_ml}
                     suffix="ml"
-                    className="text-2xl font-bold text-blue-700 dark:text-blue-300"
+                    className="text-2xl font-bold text-blue-950 drop-shadow-sm"
                   />
                 </div>
                 <Progress
@@ -354,7 +359,7 @@ export default function Dashboard() {
                     data?.nutritional_summary.total_water_ml?.toString(),
                     dailyGoals.water
                   )}
-                  className="h-2 bg-blue-100 dark:bg-blue-900"
+                  className="h-3 bg-blue-200/50"
                 />
               </>
             )}

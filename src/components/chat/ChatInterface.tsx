@@ -57,9 +57,9 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
   };
 
   return (
-    <div className={`flex h-screen bg-background ${className}`}>
+    <div className={`flex h-full bg-background ${className}`}>
       {/* Sidebar - Conversation List */}
-      <div className="w-80 border-r bg-muted/20 flex flex-col">
+      <div className="w-72 border-r bg-muted/20 flex flex-col">
         <div className="p-4 border-b">
           <h1 className="text-xl font-bold">Chat Interface</h1>
           <p className="text-sm text-muted-foreground">
@@ -67,7 +67,7 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
           </p>
         </div>
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
           <div className="h-full p-4">
             <ConversationList
               selectedConversationId={selectedConversationId}
@@ -174,15 +174,17 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
             <MessageList conversationId={selectedConversationId} />
 
             {/* Message Input */}
-            <MessageInput
-              conversationId={selectedConversationId}
-              onMessageSent={handleMessageSent}
-              placeholder={`Message ${conversation.title}...`}
-            />
+            <div className="pb-4">
+              <MessageInput
+                conversationId={selectedConversationId}
+                onMessageSent={handleMessageSent}
+                placeholder={`Message ${conversation.title}...`}
+              />
+            </div>
           </>
         ) : (
           /* Welcome Screen */
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center pb-20">
             <div className="text-center max-w-md">
               <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
                 <Info className="h-8 w-8 text-primary-foreground" />

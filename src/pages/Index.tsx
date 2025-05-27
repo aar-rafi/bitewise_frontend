@@ -189,24 +189,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-nutrition-green/20 via-nutrition-emerald/10 to-nutrition-lime/20">
+    <div className="min-h-screen relative overflow-hidden">
       {/* Animated Background Elements */}
       <FloatingFoodAnimation3D />
-      <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-nutrition-orange/20 rounded-full blur-xl animate-float"></div>
-        <div
-          className="absolute top-40 right-32 w-24 h-24 bg-nutrition-lime/30 rounded-full blur-lg animate-float"
-          style={{ animationDelay: "1s" }}
-        ></div>
-        <div
-          className="absolute bottom-32 left-1/4 w-40 h-40 bg-nutrition-emerald/15 rounded-full blur-2xl animate-float"
-          style={{ animationDelay: "2s" }}
-        ></div>
-        <div
-          className="absolute bottom-20 right-20 w-28 h-28 bg-nutrition-amber/25 rounded-full blur-xl animate-float"
-          style={{ animationDelay: "0.5s" }}
-        ></div>
-      </div>
 
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex">
@@ -227,7 +212,7 @@ const Index = () => {
         </div>
 
         {/* Right side - Login/Signup Form */}
-        <div className="w-full max-w-md p-4 flex flex-col justify-center">
+        <div className="w-full max-w-md p-4 flex flex-col justify-center -translate-x-28">
           {/* Glass Login/Signup Card */}
           <Card className="backdrop-blur-lg bg-white/10 border border-white/20 shadow-2xl shadow-black/10 relative overflow-hidden transition-all duration-500 ease-in-out">
             {/* Glass shimmer effect */}

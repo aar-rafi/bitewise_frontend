@@ -20,6 +20,7 @@ import {
   Loader2,
   CheckCircle,
   AlertCircle,
+  MessageCircle,
 } from "lucide-react";
 import FloatingFoodAnimation3D from "@/components/FloatingFoodAnimation3D";
 import { useRegister, useLogin, useVerifyLogin } from "@/hooks/useAuth";
@@ -601,22 +602,42 @@ const Index = () => {
           </Card>
 
           {/* Feature highlights */}
-          <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-            <div className="backdrop-blur-sm bg-white/10 rounded-lg p-3 border border-white/20">
-              <Leaf className="w-6 h-6 text-nutrition-green mx-auto mb-2" />
-              <p className="text-xs text-gray-700 font-medium">
-                Track Nutrition
+          <div className="mt-8 space-y-4">
+            {/* Chat Demo Button */}
+            <div className="text-center">
+              <Button
+                onClick={() => navigate("/chat")}
+                className="backdrop-blur-sm bg-nutrition-green/20 border-nutrition-green/30 hover:bg-nutrition-green/30 transition-all duration-300 text-nutrition-green hover:text-white"
+                variant="outline"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Try Chat Interface Demo
+              </Button>
+              <p className="text-xs text-gray-600 mt-2">
+                Experience our AI-powered chat system
               </p>
             </div>
-            <div className="backdrop-blur-sm bg-white/10 rounded-lg p-3 border border-white/20">
-              <Heart className="w-6 h-6 text-nutrition-emerald mx-auto mb-2" />
-              <p className="text-xs text-gray-700 font-medium">Health Goals</p>
-            </div>
-            <div className="backdrop-blur-sm bg-white/10 rounded-lg p-3 border border-white/20">
-              <Apple className="w-6 h-6 text-nutrition-lime mx-auto mb-2" />
-              <p className="text-xs text-gray-700 font-medium">
-                Smart Insights
-              </p>
+
+            {/* Original Feature Grid */}
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="backdrop-blur-sm bg-white/10 rounded-lg p-3 border border-white/20">
+                <Leaf className="w-6 h-6 text-nutrition-green mx-auto mb-2" />
+                <p className="text-xs text-gray-700 font-medium">
+                  Track Nutrition
+                </p>
+              </div>
+              <div className="backdrop-blur-sm bg-white/10 rounded-lg p-3 border border-white/20">
+                <Heart className="w-6 h-6 text-nutrition-emerald mx-auto mb-2" />
+                <p className="text-xs text-gray-700 font-medium">
+                  Health Goals
+                </p>
+              </div>
+              <div className="backdrop-blur-sm bg-white/10 rounded-lg p-3 border border-white/20">
+                <Apple className="w-6 h-6 text-nutrition-lime mx-auto mb-2" />
+                <p className="text-xs text-gray-700 font-medium">
+                  Smart Insights
+                </p>
+              </div>
             </div>
           </div>
         </div>

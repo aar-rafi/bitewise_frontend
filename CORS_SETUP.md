@@ -58,12 +58,12 @@ VITE_API_BASE_URL=
 
 The Vite proxy is configured in `vite.config.ts` to forward `/api/*` requests to `https://bitewise-backend.onrender.com`.
 
-### 3. Production Deployment
+### 3. Production Deployment (Vercel)
 
-For production (Vercel), you have two options:
+The `vercel.json` configuration handles two important issues:
 
-1. **Configure CORS on backend** (recommended)
-2. **Use Vercel rewrites** in `vercel.json`:
+1. **API Proxying**: Forwards `/api/*` requests to your backend
+2. **SPA Routing**: Serves `index.html` for all routes so React Router works
 
 ```json
 {
@@ -71,19 +71,54 @@ For production (Vercel), you have two options:
     {
       "source": "/api/(.*)",
       "destination": "https://bitewise-backend.onrender.com/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
     }
   ]
 }
 ```
 
+## Issues Fixed
+
+### CORS Error
+- **Problem**: Frontend couldn't access backend due to missing CORS headers
+- **Solution**: Vercel proxy with CORS headers OR backend CORS configuration
+
+### 404 Errors on Routes
+- **Problem**: Direct navigation to `/dashboard` returned 404
+- **Solution**: Added SPA rewrite rule to serve `index.html` for all routes
+
 ## Current Configuration
 
 - **Development**: Uses Vite proxy (no CORS issues)
-- **Production**: Requires backend CORS configuration
+- **Production**: Uses Vercel proxy and SPA routing
 - **API Base URL**: Automatically determined based on environment
+- **React Router**: All routes properly handled by client-side routing
 
 ## Testing
 
 1. Start development server: `npm run dev`
 2. Try logging in - should work without CORS errors
-3. For production, ensure backend CORS is configured before deploying 
+3. Navigate to `/dashboard` directly - should work without 404 errors
+4. For production, deploy to Vercel with the current `vercel.json` configuration 

@@ -4,6 +4,64 @@
 
 **URL**: https://lovable.dev/projects/ca2c70bd-e401-469b-a10b-c35b76f5fbe1
 
+## API Integration
+
+This project includes a complete authentication system with the following endpoints:
+
+### Register Endpoint
+- **URL**: `POST /api/v1/auth/register`
+- **Purpose**: Register a new user with email and password. An OTP verification email will be sent.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "stringst",
+  "username": "string",
+  "full_name": "string"
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "user_id": "string",
+  "email": "user@example.com",
+  "message": "string"
+}
+```
+
+**Validation Error (422):**
+```json
+{
+  "detail": [
+    {
+      "loc": ["string", 0],
+      "msg": "string",
+      "type": "string"
+    }
+  ]
+}
+```
+
+### Frontend Implementation
+The registration functionality is implemented in:
+- `src/lib/api.ts` - API client and types
+- `src/hooks/useAuth.ts` - React hooks for authentication
+- `src/pages/Index.tsx` - Login/signup form with validation
+
+### Configuration
+1. Copy `.env.example` to `.env`
+2. Set `VITE_API_BASE_URL` to your backend URL (default: `http://localhost:8000`)
+
+### Features
+- ✅ Form validation (email format, password strength, field matching)
+- ✅ Loading states with spinner
+- ✅ Error handling with detailed messages
+- ✅ Success notifications
+- ✅ Responsive design
+- ✅ TypeScript support
+
 ## How can I edit this code?
 
 There are several ways of editing your application.

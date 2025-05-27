@@ -206,10 +206,10 @@ export function useSendChatMessage() {
         },
         onSuccess: (data, variables, context) => {
             // When successful, the server messages will replace optimistic ones via invalidation
-            queryClient.invalidateQueries({ queryKey: chatKeys.messages(data.conversation_id) });
-            if (!variables.conversation_id) {
-                queryClient.invalidateQueries({ queryKey: chatKeys.conversations() });
-            }
+            // queryClient.invalidateQueries({ queryKey: chatKeys.messages(data.conversation_id) });
+            // if (!variables.conversation_id) {
+            //     queryClient.invalidateQueries({ queryKey: chatKeys.conversations() });
+            // }
         },
         onSettled: (data, error, variables, context) => {
             // Ensure messages are refetched to clear optimistic UI or update failed status properly

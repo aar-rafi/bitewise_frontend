@@ -36,6 +36,7 @@ interface MessageListProps {
 }
 
 function MessageBubble({ message }: { message: Message }) {
+  console.log("MessageBubble called with message:", message);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const { toast } = useToast();
   const deleteMessage = useDeleteMessage();
@@ -153,6 +154,9 @@ function MessageBubble({ message }: { message: Message }) {
   const isUser = message.is_user_message;
   const isThinking = message.status === "thinking";
   const isPending = message.status === "pending";
+  console.log(
+    `Message ID: ${message.id}, isUser: ${isUser}, isPending: ${isPending}, isThinking: ${isThinking}, status: ${message.status}`
+  );
 
   let badgeVariant: "default" | "secondary" | "destructive" = "secondary";
   if (
@@ -332,6 +336,18 @@ export function MessageList({ conversationId }: MessageListProps) {
     error,
   } = useMessages(conversationId);
 
+  console.log("MessageList messagesResponse:", messagesResponse);
+
+  const [showMessages, setShowMessages] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowMessages(true);
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [messagesResponse]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -340,7 +356,7 @@ export function MessageList({ conversationId }: MessageListProps) {
     scrollToBottom();
   }, [messagesResponse?.messages]);
 
-  if (isLoading) {
+  if (isLoading || !showMessages) {
     return (
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
@@ -375,7 +391,23 @@ export function MessageList({ conversationId }: MessageListProps) {
 
   const messages = messagesResponse?.messages || [];
 
-  if (messages.length === 0) {
+  // Temporarily add optimistic messages if not already present
+  // This is a diagnostic step to ensure they are in the array before rendering
+  const optimisticMessages = [
+    messages.find(
+      (msg) => typeof msg.id === "string" && msg.id.startsWith("temp-user-")
+    ),
+    messages.find(
+      (msg) => typeof msg.id === "string" && msg.id.startsWith("temp-ai-")
+    ),
+  ].filter(Boolean) as Message[];
+
+  const messagesToRender = [
+    ...messages.filter((msg) => typeof msg.id !== "string"),
+    ...optimisticMessages,
+  ];
+
+  if (messagesToRender.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center text-muted-foreground">
@@ -390,7 +422,7 @@ export function MessageList({ conversationId }: MessageListProps) {
   return (
     <ScrollArea className="flex-1 p-4">
       <div className="space-y-1">
-        {messages.map((message) => (
+        {messagesToRender.map((message) => (
           <MessageBubble key={message.id} message={message} />
         ))}
         <div ref={messagesEndRef} />

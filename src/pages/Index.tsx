@@ -279,7 +279,7 @@ const Index = () => {
                         placeholder="Enter your full name"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        className={`backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30 focus:border-nutrition-green transition-all duration-300 placeholder:text-gray-500 ${
+                        className={`backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30  transition-all duration-300 placeholder:text-gray-500 ${
                           errors.fullName
                             ? "border-red-400 focus:border-red-400"
                             : ""
@@ -312,7 +312,7 @@ const Index = () => {
                         placeholder="Choose a username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className={`backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30 focus:border-nutrition-green transition-all duration-300 placeholder:text-gray-500 ${
+                        className={`backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30  transition-all duration-300 placeholder:text-gray-500 ${
                           errors.username
                             ? "border-red-400 focus:border-red-400"
                             : ""
@@ -340,7 +340,7 @@ const Index = () => {
                         placeholder="Enter your email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className={`backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30 focus:border-nutrition-green transition-all duration-300 placeholder:text-gray-500 ${
+                        className={`backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30  transition-all duration-300 placeholder:text-gray-500 ${
                           errors.email
                             ? "border-red-400 focus:border-red-400"
                             : ""
@@ -367,7 +367,7 @@ const Index = () => {
                           placeholder="Enter your password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className={`backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30 focus:border-nutrition-green transition-all duration-300 placeholder:text-gray-500 pr-10 ${
+                          className={`backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30  transition-all duration-300 placeholder:text-gray-500 pr-10 ${
                             errors.password
                               ? "border-red-400 focus:border-red-400"
                               : ""
@@ -414,7 +414,7 @@ const Index = () => {
                           placeholder="Confirm your password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className={`backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30 focus:border-nutrition-green transition-all duration-300 placeholder:text-gray-500 pr-10 ${
+                          className={`backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30  transition-all duration-300 placeholder:text-gray-500 pr-10 ${
                             errors.confirmPassword
                               ? "border-red-400 focus:border-red-400"
                               : ""
@@ -488,7 +488,7 @@ const Index = () => {
                       value={loginOtp}
                       onChange={(e) => setLoginOtp(e.target.value)}
                       maxLength={6}
-                      className={`backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30 focus:border-nutrition-green transition-all duration-300 placeholder:text-gray-500 ${
+                      className={`backdrop-blur-sm bg-white/20 border-white/30 focus:bg-white/30  transition-all duration-300 placeholder:text-gray-500 ${
                         errors.otp ? "border-red-400 focus:border-red-400" : ""
                       }`}
                       required

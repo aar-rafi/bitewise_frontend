@@ -376,4 +376,4 @@ export const intakesApi = {
 export default {
     authApi,
     intakesApi,
-}; 
+};

@@ -21,9 +21,16 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { useState } from "react";
+import {FileUpload} from "@/components/ui/file-upload";
 
 export default function Dashboard() {
   const { data, isLoading, error } = useIntakesToday();
+  const [files, setFiles] = useState<File[]>([]);
+  const handleFileUpload = (files: File[]) => {
+    setFiles(files);
+    console.log(files);
+  };
 
   // Mock daily goals for progress calculation
   const dailyGoals = {
@@ -365,7 +372,11 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+
       </div>
+        <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-emerald-500/20 dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg">
+          <FileUpload onChange={handleFileUpload} />
+        </div>
     </div>
   );
 }

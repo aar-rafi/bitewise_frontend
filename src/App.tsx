@@ -35,13 +35,13 @@ const App = () => (
         <div className="min-h-screen bg-gradient-to-br from-nutrition-green/20 via-nutrition-emerald/10 to-nutrition-lime/20 relative overflow-hidden">
           {/* Global Animated Background Elements */}
           <div className="fixed inset-0 pointer-events-none">
-            <div className="absolute top-20 left-20 w-32 h-32 bg-nutrition-orange/20 rounded-full blur-xl animate-float"></div>
+            <div className="absolute top-20 left-20 w-32 h-32 bg-nutrition-green/25 rounded-full blur-xl animate-float"></div>
             <div
               className="absolute top-40 right-32 w-24 h-24 bg-nutrition-lime/30 rounded-full blur-lg animate-float"
               style={{ animationDelay: "1s" }}
             ></div>
             <div
-              className="absolute bottom-20 left-32 w-28 h-28 bg-nutrition-amber/25 rounded-full blur-lg animate-float"
+              className="absolute bottom-20 left-32 w-28 h-28 bg-nutrition-lime/25 rounded-full blur-lg animate-float"
               style={{ animationDelay: "2s" }}
             ></div>
             <div
@@ -53,7 +53,7 @@ const App = () => (
               style={{ animationDelay: "1.5s" }}
             ></div>
             <div
-              className="absolute bottom-1/3 right-1/3 w-20 h-20 bg-nutrition-orange/15 rounded-full blur-xl animate-float"
+              className="absolute bottom-1/3 right-1/3 w-20 h-20 bg-nutrition-emerald/15 rounded-full blur-xl animate-float"
               style={{ animationDelay: "2.5s" }}
             ></div>
           </div>

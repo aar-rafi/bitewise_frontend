@@ -216,7 +216,7 @@ const Index = () => {
           {/* Glass Login/Signup Card */}
           <Card className="backdrop-blur-lg bg-white/10 border border-white/20 shadow-2xl shadow-black/10 relative overflow-hidden transition-all duration-500 ease-in-out">
             {/* Glass shimmer effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-glass-shimmer"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/70 to-transparent animate-glass-shimmer"></div>
 
             <CardHeader className="space-y-1 text-center relative z-10">
               <CardTitle className="text-2xl font-bold text-gray-800 transition-all duration-300">

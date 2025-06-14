@@ -26,8 +26,8 @@ const FloatingFoodAnimation3D = () => {
         camera={{ position: [0, 0, 10], fov: 50 }}
         style={{ background: 'transparent' }}
       >
-        <ambientLight intensity={0.6} />
-        <pointLight position={[10, 10, 10]} intensity={0.8} />
+        <ambientLight intensity={0.4} />
+        <pointLight position={[10, 10, 10]} intensity={2} />
         
         {foodItems.map((item, index) => (
           <FloatingFood3D

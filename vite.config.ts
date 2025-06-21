@@ -37,4 +37,23 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separate vendor chunk for React and related libraries
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // Separate chunk for UI components
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-popover', '@radix-ui/react-select'],
+          // Separate chunk for utility libraries
+          'utils-vendor': ['clsx', 'tailwind-merge', 'date-fns'],
+          // Separate chunk for data fetching
+          'query-vendor': ['@tanstack/react-query'],
+          // Separate chunk for charts/animations
+          'visual-vendor': ['recharts', 'framer-motion'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000, // Increase warning limit to 1000kb
+  },
 }));

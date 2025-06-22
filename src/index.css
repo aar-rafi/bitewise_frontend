@@ -100,6 +100,30 @@
   }
 }
 
+/* Nutrition-themed floating animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+    opacity: 0.7;
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) rotate(5deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-10px) translateX(-15px) rotate(-3deg);
+    opacity: 0.9;
+  }
+  75% {
+    transform: translateY(-30px) translateX(5px) rotate(7deg);
+    opacity: 0.6;
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
 /* Custom animations for chat interface */
 @keyframes pulse-border {
   0% {

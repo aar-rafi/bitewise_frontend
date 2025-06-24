@@ -5,10 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:clean": "rm -rf node_modules/.vite && vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "clean": "rm -rf node_modules/.vite dist",
+    "fresh": "rm -rf node_modules/.vite node_modules && npm install && npm run dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

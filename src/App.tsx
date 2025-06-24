@@ -12,6 +12,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Chat = lazy(() => import("./pages/Chat"));
+const Stats = lazy(() => import("./pages/Stats"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -119,6 +120,7 @@ const App = () => {
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/verify-email" element={<VerifyEmail />} />
                   <Route path="/chat" element={<Chat />} />
+                  <Route path="/stats" element={<Stats />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

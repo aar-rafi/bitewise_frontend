@@ -26,6 +26,8 @@ import FloatingFoodAnimation3D from "@/components/FloatingFoodAnimation3D";
 import { useRegister, useLogin, useVerifyLogin } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import Profile from "./Profile";
+import ProfileUpdate from "./ProfileUpdate";
 
 const Index = () => {
   const navigate = useNavigate();

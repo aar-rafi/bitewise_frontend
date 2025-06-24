@@ -13,6 +13,8 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Stats = lazy(() => import("./pages/Stats"));
+const Profile = lazy(() => import("./pages/Profile"));
+const ProfileUpdate = lazy(() => import("./pages/ProfileUpdate"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -106,7 +108,6 @@ const App = () => {
             {/* Enhanced nutrition-themed background patterns */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(34,197,94,0.1),transparent_50%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(16,185,129,0.1),transparent_50%)]" />
-            {/* <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_49%,rgba(34,197,94,0.03)_50%,transparent_51%)]" /> */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(251,191,36,0.08),transparent_40%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(239,68,68,0.06),transparent_40%)]" />
 
@@ -121,6 +122,8 @@ const App = () => {
                   <Route path="/verify-email" element={<VerifyEmail />} />
                   <Route path="/chat" element={<Chat />} />
                   <Route path="/stats" element={<Stats />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/profile/update" element={<ProfileUpdate />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

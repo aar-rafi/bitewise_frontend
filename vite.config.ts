@@ -40,6 +40,22 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@tanstack/react-query',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-select',
+      'recharts',
+      'date-fns',
+      'clsx',
+      'tailwind-merge'
+    ],
+    force: mode === 'development', // Force re-optimization in development
+  },
   build: {
     rollupOptions: {
       output: {

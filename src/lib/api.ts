@@ -373,7 +373,72 @@ export const intakesApi = {
     },
 };
 
+// Profile API types
+export interface UserProfile {
+    first_name: string;
+    last_name: string;
+    gender: string;
+    height_cm: string;
+    weight_kg: string;
+    date_of_birth: string;
+    location_city: string;
+    location_country: string;
+    latitude: number | null;
+    longitude: number | null;
+    profile_image_url: string | null;
+    bio: string | null;
+    dietary_restrictions: string[] | null;
+    allergies: string[] | null;
+    medical_conditions: string[];
+    fitness_goals: string[];
+    taste_preferences: string[];
+    cuisine_interests: string[];
+    cooking_skill_level: string;
+    email_notifications_enabled: boolean;
+    push_notifications_enabled: boolean;
+    user_id: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface UpdateUserProfileRequest {
+    first_name?: string;
+    last_name?: string;
+    gender?: string;
+    height_cm?: string;
+    weight_kg?: string;
+    date_of_birth?: string;
+    location_city?: string;
+    location_country?: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    profile_image_url?: string | null;
+    bio?: string | null;
+    dietary_restrictions?: string[] | null;
+    allergies?: string[] | null;
+    medical_conditions?: string[];
+    fitness_goals?: string[];
+    taste_preferences?: string[];
+    cuisine_interests?: string[];
+    cooking_skill_level?: string;
+    email_notifications_enabled?: boolean;
+    push_notifications_enabled?: boolean;
+}
+
+export const profileApi = {
+    getMe: async (): Promise<UserProfile> => {
+        return apiCall<UserProfile>("/api/v1/profile/me", { method: "GET" });
+    },
+    updateMe: async (data: UpdateUserProfileRequest): Promise<UserProfile> => {
+        return apiCall<UserProfile>("/api/v1/profile/me", {
+            method: "PUT",
+            body: JSON.stringify(data),
+        });
+    },
+};
+
 export default {
     authApi,
     intakesApi,
+    profileApi,
 };

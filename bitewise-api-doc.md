@@ -20,6 +20,858 @@ Authorization: Bearer YOUR_API_TOKEN
 
 To obtain an API token, register at the [BiteWise Developer Portal](https://developers.bitewise.com).
 
+## Authentication Endpoints
+
+### Traditional Authentication
+
+#### User Registration
+
+```http
+POST /auth/register
+```
+
+Creates a new user account with email and password authentication.
+
+**Request Body**:
+
+```json
+{
+  "email": "string",
+  "password": "string",
+  "username": "string",
+  "first_name": "string",
+  "last_name": "string",
+  "accept_terms": boolean
+}
+```
+
+**Validation Requirements**:
+- Email must be valid and unique
+- Password must be at least 8 characters with uppercase, lowercase, number, and special character
+- Username must be unique and 3-30 characters
+- accept_terms must be true
+
+**Response** (201 Created):
+
+```json
+{
+  "user_id": "string",
+  "email": "string",
+  "username": "string",
+  "access_token": "string",
+  "refresh_token": "string",
+  "expires_in": 3600,
+  "token_type": "Bearer",
+  "email_verification_required": boolean,
+  "created_at": "string (ISO datetime)"
+}
+```
+
+**Error Response** (422 Unprocessable Entity):
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "details": {
+      "email": ["Email already exists"],
+      "password": ["Password must contain at least one uppercase letter"]
+    }
+  }
+}
+```
+
+#### User Login
+
+```http
+POST /auth/login
+```
+
+Authenticates a user with email and password credentials.
+
+**Request Body**:
+
+```json
+{
+  "email": "string",
+  "password": "string",
+  "remember_me": boolean
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "user_id": "string",
+  "email": "string",
+  "username": "string",
+  "access_token": "string",
+  "refresh_token": "string",
+  "expires_in": 3600,
+  "token_type": "Bearer",
+  "last_login": "string (ISO datetime)",
+  "profile_complete": boolean
+}
+```
+
+**Error Response** (401 Unauthorized):
+
+```json
+{
+  "error": {
+    "code": "INVALID_CREDENTIALS",
+    "message": "Invalid email or password"
+  }
+}
+```
+
+#### Logout
+
+```http
+POST /auth/logout
+```
+
+Invalidates the current authentication token.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "Successfully logged out"
+}
+```
+
+#### Refresh Token
+
+```http
+POST /auth/refresh
+```
+
+Generates a new access token using a valid refresh token.
+
+**Request Body**:
+
+```json
+{
+  "refresh_token": "string"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "access_token": "string",
+  "refresh_token": "string",
+  "expires_in": 3600,
+  "token_type": "Bearer"
+}
+```
+
+**Error Response** (401 Unauthorized):
+
+```json
+{
+  "error": {
+    "code": "INVALID_REFRESH_TOKEN",
+    "message": "Refresh token is invalid or expired"
+  }
+}
+```
+
+#### Verify Email
+
+```http
+POST /auth/verify-email
+```
+
+Verifies a user's email address using a verification token.
+
+**Request Body**:
+
+```json
+{
+  "email": "string",
+  "verification_token": "string"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "Email verified successfully",
+  "email_verified": true,
+  "verified_at": "string (ISO datetime)"
+}
+```
+
+#### Resend Verification Email
+
+```http
+POST /auth/resend-verification
+```
+
+Sends a new email verification link to the user's email address.
+
+**Request Body**:
+
+```json
+{
+  "email": "string"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "Verification email sent successfully"
+}
+```
+
+#### Request Password Reset
+
+```http
+POST /auth/forgot-password
+```
+
+Initiates password reset process by sending a reset link to the user's email.
+
+**Request Body**:
+
+```json
+{
+  "email": "string"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "Password reset email sent if account exists"
+}
+```
+
+Note: This endpoint always returns success to prevent email enumeration attacks.
+
+#### Reset Password
+
+```http
+POST /auth/reset-password
+```
+
+Resets user password using a valid reset token.
+
+**Request Body**:
+
+```json
+{
+  "email": "string",
+  "reset_token": "string",
+  "new_password": "string",
+  "confirm_password": "string"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "Password reset successfully"
+}
+```
+
+**Error Response** (400 Bad Request):
+
+```json
+{
+  "error": {
+    "code": "INVALID_RESET_TOKEN",
+    "message": "Reset token is invalid or expired"
+  }
+}
+```
+
+#### Change Password
+
+```http
+POST /auth/change-password
+```
+
+Changes the password for an authenticated user.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Request Body**:
+
+```json
+{
+  "current_password": "string",
+  "new_password": "string",
+  "confirm_password": "string"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "Password changed successfully"
+}
+```
+
+### Google OAuth Authentication
+
+#### Google OAuth Login URL
+
+```http
+GET /auth/google/login
+```
+
+Generates Google OAuth authorization URL for user authentication.
+
+**Query Parameters**:
+- `redirect_uri` (string, optional): Custom redirect URI after authentication
+- `state` (string, optional): State parameter for security
+
+**Response** (200 OK):
+
+```json
+{
+  "authorization_url": "https://accounts.google.com/oauth/authorize?client_id=...",
+  "state": "string"
+}
+```
+
+#### Google OAuth Callback
+
+```http
+POST /auth/google/callback
+```
+
+Handles Google OAuth callback and creates or authenticates user.
+
+**Request Body**:
+
+```json
+{
+  "code": "string",
+  "state": "string"
+}
+```
+
+**Response** (200 OK) - Existing User:
+
+```json
+{
+  "user_id": "string",
+  "email": "string",
+  "username": "string",
+  "access_token": "string",
+  "refresh_token": "string",
+  "expires_in": 3600,
+  "token_type": "Bearer",
+  "provider": "google",
+  "first_login": false,
+  "profile_complete": boolean
+}
+```
+
+**Response** (201 Created) - New User:
+
+```json
+{
+  "user_id": "string",
+  "email": "string",
+  "username": "string",
+  "access_token": "string",
+  "refresh_token": "string",
+  "expires_in": 3600,
+  "token_type": "Bearer",
+  "provider": "google",
+  "first_login": true,
+  "profile_complete": false,
+  "setup_required": true
+}
+```
+
+#### Link Google Account
+
+```http
+POST /auth/google/link
+```
+
+Links a Google account to an existing authenticated user account.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Request Body**:
+
+```json
+{
+  "code": "string",
+  "state": "string"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "Google account linked successfully",
+  "google_email": "string",
+  "linked_at": "string (ISO datetime)"
+}
+```
+
+#### Unlink Google Account
+
+```http
+DELETE /auth/google/unlink
+```
+
+Removes Google account linkage from user profile.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "Google account unlinked successfully"
+}
+```
+
+### Account Management
+
+#### Get Current User
+
+```http
+GET /auth/me
+```
+
+Retrieves the currently authenticated user's information.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Response** (200 OK):
+
+```json
+{
+  "user_id": "string",
+  "email": "string",
+  "username": "string",
+  "first_name": "string",
+  "last_name": "string",
+  "email_verified": boolean,
+  "profile_complete": boolean,
+  "provider": "email|google",
+  "google_linked": boolean,
+  "created_at": "string (ISO datetime)",
+  "last_login": "string (ISO datetime)",
+  "avatar_url": "string"
+}
+```
+
+#### Update Account Info
+
+```http
+PATCH /auth/me
+```
+
+Updates the current user's account information.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Request Body**:
+
+```json
+{
+  "first_name": "string",
+  "last_name": "string",
+  "username": "string",
+  "avatar": "base64_encoded_string"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "user_id": "string",
+  "updated_fields": ["first_name", "username"],
+  "updated_at": "string (ISO datetime)"
+}
+```
+
+#### Delete Account
+
+```http
+DELETE /auth/me
+```
+
+Permanently deletes the user's account and all associated data.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Request Body**:
+
+```json
+{
+  "password": "string",
+  "confirmation": "DELETE_MY_ACCOUNT"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "Account deleted successfully",
+  "deleted_at": "string (ISO datetime)"
+}
+```
+
+### Session Management
+
+#### Get Active Sessions
+
+```http
+GET /auth/sessions
+```
+
+Retrieves all active sessions for the authenticated user.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Response** (200 OK):
+
+```json
+{
+  "sessions": [
+    {
+      "session_id": "string",
+      "device_info": {
+        "user_agent": "string",
+        "ip_address": "string",
+        "location": "string",
+        "device_type": "mobile|desktop|tablet"
+      },
+      "created_at": "string (ISO datetime)",
+      "last_activity": "string (ISO datetime)",
+      "is_current": boolean
+    }
+  ]
+}
+```
+
+#### Revoke Session
+
+```http
+DELETE /auth/sessions/{session_id}
+```
+
+Revokes a specific session, invalidating its tokens.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Path Parameters**:
+- `session_id` (string, required): Session identifier to revoke
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "Session revoked successfully"
+}
+```
+
+#### Revoke All Sessions
+
+```http
+DELETE /auth/sessions
+```
+
+Revokes all sessions except the current one.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "All other sessions revoked successfully",
+  "revoked_count": integer
+}
+```
+
+### Two-Factor Authentication (2FA)
+
+#### Enable 2FA
+
+```http
+POST /auth/2fa/enable
+```
+
+Enables two-factor authentication for the user account.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Response** (200 OK):
+
+```json
+{
+  "qr_code": "base64_encoded_qr_image",
+  "secret": "string",
+  "backup_codes": ["string"],
+  "setup_url": "string"
+}
+```
+
+#### Confirm 2FA Setup
+
+```http
+POST /auth/2fa/confirm
+```
+
+Confirms 2FA setup with a verification code.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Request Body**:
+
+```json
+{
+  "totp_code": "string"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "2FA enabled successfully",
+  "enabled_at": "string (ISO datetime)"
+}
+```
+
+#### Disable 2FA
+
+```http
+POST /auth/2fa/disable
+```
+
+Disables two-factor authentication.
+
+**Headers**:
+- `Authorization: Bearer {access_token}`
+
+**Request Body**:
+
+```json
+{
+  "password": "string",
+  "totp_code": "string"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "message": "2FA disabled successfully"
+}
+```
+
+#### Verify 2FA Code
+
+```http
+POST /auth/2fa/verify
+```
+
+Verifies a 2FA code during login process.
+
+**Request Body**:
+
+```json
+{
+  "email": "string",
+  "totp_code": "string",
+  "temporary_token": "string"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "access_token": "string",
+  "refresh_token": "string",
+  "expires_in": 3600,
+  "token_type": "Bearer"
+}
+```
+
+### Authentication Usage Examples
+
+#### Frontend Integration
+
+```javascript
+// User registration
+const registerUser = async (userData) => {
+  const response = await fetch('/api/v1/auth/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(userData)
+  });
+  
+  if (response.ok) {
+    const data = await response.json();
+    // Store tokens securely
+    localStorage.setItem('access_token', data.access_token);
+    localStorage.setItem('refresh_token', data.refresh_token);
+    return data;
+  }
+  throw new Error('Registration failed');
+};
+
+// User login
+const loginUser = async (email, password) => {
+  const response = await fetch('/api/v1/auth/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ email, password })
+  });
+  
+  if (response.ok) {
+    const data = await response.json();
+    localStorage.setItem('access_token', data.access_token);
+    localStorage.setItem('refresh_token', data.refresh_token);
+    return data;
+  }
+  throw new Error('Login failed');
+};
+
+// Google OAuth flow
+const initiateGoogleAuth = async () => {
+  const response = await fetch('/api/v1/auth/google/login');
+  const data = await response.json();
+  
+  // Redirect to Google OAuth
+  window.location.href = data.authorization_url;
+};
+
+// Handle OAuth callback
+const handleGoogleCallback = async (code, state) => {
+  const response = await fetch('/api/v1/auth/google/callback', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ code, state })
+  });
+  
+  if (response.ok) {
+    const data = await response.json();
+    localStorage.setItem('access_token', data.access_token);
+    localStorage.setItem('refresh_token', data.refresh_token);
+    
+    if (data.first_login && data.setup_required) {
+      // Redirect to profile setup
+      window.location.href = '/setup-profile';
+    } else {
+      // Redirect to dashboard
+      window.location.href = '/dashboard';
+    }
+  }
+};
+
+// Token refresh
+const refreshToken = async () => {
+  const refreshToken = localStorage.getItem('refresh_token');
+  
+  const response = await fetch('/api/v1/auth/refresh', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ refresh_token: refreshToken })
+  });
+  
+  if (response.ok) {
+    const data = await response.json();
+    localStorage.setItem('access_token', data.access_token);
+    localStorage.setItem('refresh_token', data.refresh_token);
+    return data.access_token;
+  }
+  
+  // Refresh failed, redirect to login
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  window.location.href = '/login';
+};
+
+// Authenticated API request with auto-refresh
+const makeAuthenticatedRequest = async (url, options = {}) => {
+  let token = localStorage.getItem('access_token');
+  
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  
+  if (response.status === 401) {
+    // Token expired, try to refresh
+    token = await refreshToken();
+    
+    // Retry original request
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  }
+  
+  return response;
+};
+```
+
+#### Security Best Practices
+
+1. **Token Storage**: Store tokens securely (httpOnly cookies preferred over localStorage)
+2. **HTTPS Only**: All authentication endpoints require HTTPS in production
+3. **Token Expiration**: Access tokens expire in 1 hour, refresh tokens in 7 days
+4. **Rate Limiting**: Login attempts are rate-limited to prevent brute force attacks
+5. **Password Requirements**: Strong password policies enforced
+6. **2FA Recommended**: Enable two-factor authentication for enhanced security
+
 ## Rate Limiting
 
 Requests are limited to 100 per minute per API token. Rate limit information is provided in the response headers:

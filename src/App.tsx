@@ -11,6 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const GoogleCallback = lazy(() => import("./pages/GoogleCallback"));
+const SetupProfile = lazy(() => import("./pages/SetupProfile"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Stats = lazy(() => import("./pages/Stats"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -90,7 +92,7 @@ const ConditionalBottomNavBar = () => {
   const location = useLocation();
 
   // Routes where BottomNavBar should NOT be shown
-  const routesWithoutNavBar = ["/", "/verify-email"];
+  const routesWithoutNavBar = ["/", "/verify-email", "/auth/google/callback", "/setup-profile"];
 
   if (routesWithoutNavBar.includes(location.pathname)) {
     return null;
@@ -120,6 +122,8 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/verify-email" element={<VerifyEmail />} />
+                  <Route path="/auth/google/callback" element={<GoogleCallback />} />
+                  <Route path="/setup-profile" element={<SetupProfile />} />
                   <Route path="/chat" element={<Chat />} />
                   <Route path="/stats" element={<Stats />} />
                   <Route path="/profile" element={<Profile />} />

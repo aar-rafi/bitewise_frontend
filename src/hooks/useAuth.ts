@@ -12,6 +12,9 @@ import {
     type VerifyLoginRequest,
     type VerifyLoginResponse,
     type RefreshTokenResponse,
+    type GoogleLoginResponse,
+    type GoogleCallbackRequest,
+    type GoogleCallbackResponse,
 } from "@/lib/api";
 
 interface UseRegisterOptions {
@@ -174,10 +177,89 @@ export const useRefreshToken = (options: UseRefreshTokenOptions = {}) => {
     };
 };
 
+// Google OAuth hooks
+interface UseGoogleLoginOptions {
+    onSuccess?: (data: GoogleLoginResponse) => void;
+    onError?: (error: ApiError) => void;
+}
+
+export const useGoogleLogin = (options: UseGoogleLoginOptions = {}) => {
+    const [isSuccess, setIsSuccess] = useState(false);
+
+    const mutation = useMutation({
+        mutationFn: ({ redirectUri }: { redirectUri: string }) => 
+            authApi.googleLogin(redirectUri),
+        onSuccess: (data) => {
+            setIsSuccess(true);
+            options.onSuccess?.(data);
+        },
+        onError: (error) => {
+            setIsSuccess(false);
+            options.onError?.(error as unknown as ApiError);
+        },
+    });
+
+    const reset = () => {
+        setIsSuccess(false);
+        mutation.reset();
+    };
+
+    // Async version for direct usage
+    const googleLoginAsync = async ({ redirectUri }: { redirectUri: string }) => {
+        return authApi.googleLogin(redirectUri);
+    };
+
+    return {
+        googleLogin: mutation.mutate,
+        googleLoginAsync,
+        isLoading: mutation.isPending,
+        error: mutation.error as ApiError | null,
+        isSuccess,
+        reset,
+    };
+};
+
+interface UseGoogleCallbackOptions {
+    onSuccess?: (data: GoogleCallbackResponse) => void;
+    onError?: (error: ApiError) => void;
+}
+
+export const useGoogleCallback = (options: UseGoogleCallbackOptions = {}) => {
+    const [isSuccess, setIsSuccess] = useState(false);
+
+    const mutation = useMutation({
+        mutationFn: (data: GoogleCallbackRequest) => authApi.googleCallback(data),
+        onSuccess: (data) => {
+            setIsSuccess(true);
+            options.onSuccess?.(data);
+        },
+        onError: (error) => {
+            setIsSuccess(false);
+            options.onError?.(error as unknown as ApiError);
+        },
+    });
+
+    const reset = () => {
+        setIsSuccess(false);
+        mutation.reset();
+    };
+
+    return {
+        googleCallback: mutation.mutate,
+        isLoading: mutation.isPending,
+        error: mutation.error as unknown as ApiError | null,
+        isSuccess,
+        data: mutation.data,
+        reset,
+    };
+};
+
 export default {
     useRegister,
     useLogin,
     useVerifyLogin,
     useVerifyEmail,
     useRefreshToken,
+    useGoogleLogin,
+    useGoogleCallback,
 }; 

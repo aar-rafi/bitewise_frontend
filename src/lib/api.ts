@@ -8,6 +8,8 @@ const API_ENDPOINTS = {
     VERIFY_EMAIL: "/api/v1/auth/verify-email",
     VERIFY_LOGIN: "/api/v1/auth/verify-login",
     REFRESH_TOKEN: "/api/v1/auth/refresh",
+    GOOGLE_LOGIN: "/api/v1/auth/google/login",
+    GOOGLE_CALLBACK: "/api/v1/auth/google/callback",
 } as const;
 
 // Types for API requests and responses
@@ -21,6 +23,8 @@ export interface RegisterRequest {
 export interface RegisterResponse {
     user_id: string;
     email: string;
+    username: string;
+    full_name: string;
     message: string;
 }
 
@@ -46,6 +50,32 @@ export interface VerifyLoginResponse {
     expires_in: number;
     refresh_token: string;
     user_id: string;
+}
+
+// Google OAuth types
+export interface GoogleLoginResponse {
+    authorization_url: string;
+    state: string;
+}
+
+export interface GoogleCallbackRequest {
+    code: string;
+    state: string;
+}
+
+export interface GoogleCallbackResponse {
+    user_id: string;
+    email: string;
+    username: string;
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+    token_type: string;
+    provider: string;
+    first_login: boolean;
+    profile_complete: boolean;
+    setup_required?: boolean;
+    is_new_user: boolean;
 }
 
 export interface RefreshTokenRequest {
@@ -81,7 +111,7 @@ export interface ValidationError {
 export interface ApiError {
     message: string;
     status: number;
-    details?: ValidationError;
+    details?: ValidationError | { redirect_location?: string } | Record<string, unknown>;
 }
 
 // Token storage keys
@@ -114,12 +144,47 @@ async function apiCall<T>(
             ...defaultHeaders,
             ...options.headers,
         },
+        // Prevent automatic redirect following for better control
+        redirect: 'manual'
     };
 
     try {
         const response = await fetch(url, config);
 
-        if (!response.ok) {
+        // Handle redirect responses (3xx status codes)
+        if (response.status >= 300 && response.status < 400) {
+            // For 3xx responses, check if there's a location header for manual handling
+            const location = response.headers.get('location');
+            if (location) {
+                // Log the redirect for debugging
+                console.log(`Received redirect ${response.status} to: ${location}`);
+                
+                // For Google OAuth callback, we might want to follow the redirect
+                // or extract information from the response body if available
+                try {
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        // If there's JSON content in the redirect response, parse it
+                        const data = await response.json();
+                        return data as T;
+                    }
+                } catch (jsonError) {
+                    // If JSON parsing fails, handle the redirect differently
+                    console.warn('Failed to parse JSON from redirect response:', jsonError);
+                }
+                
+                // For manual redirect handling, you might want to follow the redirect
+                // depending on your specific use case
+                throw {
+                    message: `Redirect received: ${response.status} ${response.statusText}`,
+                    status: response.status,
+                    location: location,
+                } as ApiError & { location: string };
+            }
+        }
+
+        // Check for client/server errors (4xx, 5xx)
+        if (response.status >= 400) {
             const errorData = await response.json().catch(() => ({}));
 
             if (response.status === 401 && !isRetry) {
@@ -144,8 +209,6 @@ async function apiCall<T>(
                         } else {
                             // No refresh token, clear tokens and navigate to login or throw error
                             authApi.logout();
-                            // Optionally, redirect to login page here
-                            // window.location.href = '/login'; 
                             throw {
                                 message: "Session expired. Please log in again.",
                                 status: 401,
@@ -154,8 +217,6 @@ async function apiCall<T>(
                     } catch (refreshError) {
                         // Refresh failed, clear tokens and throw an error
                         authApi.logout();
-                        // Optionally, redirect to login page here
-                        // window.location.href = '/login'; 
                         const typedRefreshError = refreshError as ApiError;
                         throw {
                             message: typedRefreshError.message || "Failed to refresh session. Please log in again.",
@@ -164,7 +225,6 @@ async function apiCall<T>(
                     }
                 }
             }
-
 
             const apiError: ApiError = {
                 message: errorData.detail?.[0]?.msg || (typeof errorData.detail === 'string' ? errorData.detail : `HTTP ${response.status}: ${response.statusText}`),
@@ -175,13 +235,12 @@ async function apiCall<T>(
             throw apiError;
         }
 
-        // Handle cases where response might be empty (e.g., 204 No Content)
+        // Handle successful responses (2xx status codes)
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
             return await response.json();
         } else {
-            // For non-JSON responses or empty responses, return a success indicator or the response object itself
-            // This part might need adjustment based on what your API returns for non-JSON success cases
+            // For non-JSON responses or empty responses, return a success indicator
             return { success: true, status: response.status, statusText: response.statusText } as T;
         }
 
@@ -191,13 +250,12 @@ async function apiCall<T>(
             throw error;
         }
         if (error instanceof SyntaxError) {
-            // Handle JSON parsing errors specifically if needed, e.g. when expecting JSON but got HTML
+            // Handle JSON parsing errors specifically
             throw {
                 message: "Invalid response from server. Please try again later.",
-                status: 0, // Or some other status code to indicate a client-side parsing issue
+                status: 0,
             } as ApiError;
         }
-
 
         // Handle network errors or other unexpected errors
         throw {
@@ -295,6 +353,93 @@ export const authApi = {
 
     logout: () => {
         tokenStorage.clearTokens();
+    },
+
+    // Google OAuth methods
+    googleLogin: async (redirectUri: string): Promise<GoogleLoginResponse> => {
+        const params = new URLSearchParams();
+        params.append('redirect_uri', redirectUri);
+        
+        const url = `${API_ENDPOINTS.GOOGLE_LOGIN}?${params.toString()}`;
+        return apiCall<GoogleLoginResponse>(url, {
+            method: "GET",
+        });
+    },
+
+    googleCallback: async (data: GoogleCallbackRequest): Promise<GoogleCallbackResponse> => {
+        // Create a specialized function for Google OAuth callback that handles redirects differently
+        const url = `${API_BASE_URL}${API_ENDPOINTS.GOOGLE_CALLBACK}`;
+        const accessToken = tokenStorage.getAccessToken();
+
+        const headers: HeadersInit = {
+            "Content-Type": "application/json",
+        };
+
+        if (accessToken) {
+            headers["Authorization"] = `Bearer ${accessToken}`;
+        }
+
+        try {
+            // For Google OAuth callback, we'll allow automatic redirect handling
+            const response = await fetch(url, {
+                method: "POST",
+                headers,
+                body: JSON.stringify(data),
+                // Allow automatic redirects for OAuth callback
+                redirect: 'follow'
+            });
+
+            // Check if the response is successful
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw {
+                    message: errorData.detail?.[0]?.msg || (typeof errorData.detail === 'string' ? errorData.detail : `HTTP ${response.status}: ${response.statusText}`),
+                    status: response.status,
+                    details: errorData,
+                } as ApiError;
+            }
+
+            // Parse the successful response
+            const responseData = await response.json();
+
+            // Validate that we have the required fields for authentication
+            if (!responseData.access_token || !responseData.refresh_token) {
+                throw {
+                    message: "Invalid response from authentication server: missing tokens",
+                    status: 500,
+                } as ApiError;
+            }
+
+            // Store tokens on successful authentication
+            tokenStorage.setTokens(
+                responseData.access_token,
+                responseData.refresh_token,
+                responseData.expires_in
+            );
+
+            return responseData as GoogleCallbackResponse;
+
+        } catch (error) {
+            // Enhanced error handling for common OAuth issues
+            if (error instanceof TypeError && error.message.includes('fetch')) {
+                // Network error
+                throw {
+                    message: "Network error occurred during authentication. Please check your connection and try again.",
+                    status: 0,
+                } as ApiError;
+            }
+
+            // If it's already an ApiError, re-throw it
+            if (error && typeof error === 'object' && 'status' in error) {
+                throw error;
+            }
+
+            // Generic error fallback
+            throw {
+                message: "An unexpected error occurred during Google authentication. Please try again.",
+                status: 500,
+            } as ApiError;
+        }
     },
 };
 

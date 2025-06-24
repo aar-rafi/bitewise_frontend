@@ -11,6 +11,7 @@ import {
     UpdateMessageRequest,
     GetConversationsResponse,
 } from '@/types/chat';
+import { authApi } from '@/lib/api';
 
 // Import the existing API infrastructure
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
@@ -64,7 +65,6 @@ async function chatApiCall<T>(
                 if (refreshToken) {
                     try {
                         // Try to refresh the token using the existing auth API
-                        const { authApi } = await import('@/lib/api');
                         const refreshResponse = await authApi.refreshToken(refreshToken);
 
                         // Retry the original request with new token

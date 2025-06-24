@@ -9,6 +9,8 @@ import VerifyEmail from "./pages/VerifyEmail";
 import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 import BottomNavBar from "./components/BottomNavBar";
+import Profile from "./pages/Profile";
+import ProfileUpdate from "./pages/ProfileUpdate";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +66,8 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/chat" element={<Chat />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/update" element={<ProfileUpdate />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

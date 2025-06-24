@@ -65,8 +65,8 @@ export default function Profile() {
             <div className="flex items-center gap-2 text-green-900"><Ruler className="w-4 h-4" /> {profile.height_cm} cm</div>
             <div className="flex items-center gap-2 text-green-900"><Weight className="w-4 h-4" /> {profile.weight_kg} kg</div>
             <div className="flex items-center gap-2 text-green-900"><Globe className="w-4 h-4" /> {profile.location_city}, {profile.location_country}</div>
-            <div className="flex items-center gap-2 text-green-900"><Sparkles className="w-4 h-4" /> {profile.cooking_skill_level}</div>
-            <div className="flex items-center gap-2 text-green-900"><MapPin className="w-4 h-4" /> {profile.gender}</div>
+            <div className="flex items-center gap-2 text-green-900"><Sparkles className="w-4 h-4" /> {profile.cooking_skill_level.charAt(0).toUpperCase() + profile.cooking_skill_level.slice(1)}</div>
+            <div className="flex items-center gap-2 text-green-900"><MapPin className="w-4 h-4" /> {profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1)}</div>
           </div>
 
           {/* Bio */}

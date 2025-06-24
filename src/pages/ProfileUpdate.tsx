@@ -39,8 +39,9 @@ export default function ProfileUpdate() {
       await profileApi.updateMe(form);
       setSuccess(true);
       setTimeout(() => navigate("/profile"), 1000);
-    } catch (e: any) {
-      setError(e.message || "Failed to update profile");
+    } catch (e: unknown) {
+      const error = e as { message?: string };
+      setError(error.message || "Failed to update profile");
     } finally {
       setSaving(false);
     }
@@ -81,8 +82,23 @@ export default function ProfileUpdate() {
               <Input name="location_country" value={form.location_country || ""} onChange={handleChange} placeholder="Country" />
             </div>
             <Textarea name="bio" value={form.bio || ""} onChange={handleChange} placeholder="Bio" />
-            <div className="flex justify-center mt-6">
-              <Button size="lg" className="px-8 py-2 text-lg font-bold shadow-md bg-gradient-to-r from-nutrition-green to-nutrition-emerald text-white hover:scale-105 transition-transform" type="submit" disabled={saving}>{saving ? "Saving..." : "Update"}</Button>
+            <div className="flex justify-center gap-4 mt-6">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="px-8 py-2 text-lg font-bold shadow-md border-green-500 text-green-700 hover:bg-green-50 transition-all" 
+                onClick={() => navigate("/profile")}
+              >
+                Cancel
+              </Button>
+              <Button 
+                size="lg" 
+                className="px-8 py-2 text-lg font-bold shadow-md bg-gradient-to-r from-nutrition-green to-nutrition-emerald text-white hover:scale-105 transition-transform" 
+                type="submit" 
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Update"}
+              </Button>
             </div>
             {success && <div className="text-green-600 text-center">Profile updated!</div>}
             {error && <div className="text-red-600 text-center">{error}</div>}

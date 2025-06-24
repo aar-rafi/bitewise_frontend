@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { ConversationList } from "./ConversationList";
 import { MessageList } from "./MessageList";
-import { MessageInput } from "./MessageInput";
+import { MessageInputWithImages } from "./MessageInputWithImages";
 import {
   useConversation,
   useConversationSummary,
@@ -63,7 +63,7 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
         <div className="p-4 border-b">
           <h1 className="text-xl font-bold">Chat Interface</h1>
           <p className="text-sm text-muted-foreground">
-            AI-powered conversations
+            AI-powered conversations with image support
           </p>
         </div>
 
@@ -82,30 +82,32 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
         {selectedConversationId && conversation ? (
           <>
             {/* Chat Header */}
-            <div className="border-b bg-background p-4">
+            <div className="border-b p-4 bg-background">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div>
-                    <h2 className="text-lg font-semibold">
+                    <h2 className="font-semibold text-lg truncate max-w-[300px]">
                       {conversation.title}
                     </h2>
                     <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                      <Badge variant="outline" className="text-xs">
+                        ID: {conversation.id}
+                      </Badge>
                       <Badge
                         variant={
                           conversation.status === "active"
                             ? "default"
                             : "secondary"
                         }
+                        className="text-xs"
                       >
                         {conversation.status}
                       </Badge>
-                      <span>ID: {conversation.id}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  {/* Conversation Summary Dialog */}
                   <Dialog open={showSummary} onOpenChange={setShowSummary}>
                     <DialogTrigger asChild>
                       <Button variant="outline" size="sm">
@@ -113,22 +115,22 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
                         Summary
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
+                    <DialogContent className="max-w-md">
                       <DialogHeader>
                         <DialogTitle>Conversation Summary</DialogTitle>
                       </DialogHeader>
                       {summary ? (
                         <div className="space-y-4">
                           <div>
-                            <h3 className="font-semibold mb-2">Overview</h3>
+                            <h4 className="font-medium mb-2">Summary</h4>
                             <p className="text-sm text-muted-foreground">
                               {summary.summary}
                             </p>
                           </div>
 
                           <div>
-                            <h3 className="font-semibold mb-2">Key Topics</h3>
-                            <div className="flex flex-wrap gap-2">
+                            <h4 className="font-medium mb-2">Key Topics</h4>
+                            <div className="flex flex-wrap gap-1">
                               {summary.key_topics.map((topic, index) => (
                                 <Badge key={index} variant="secondary">
                                   {topic}
@@ -173,9 +175,9 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
             {/* Messages Area */}
             <MessageList conversationId={selectedConversationId} />
 
-            {/* Message Input */}
+            {/* Message Input with Image Support */}
             <div className="pb-4">
-              <MessageInput
+              <MessageInputWithImages
                 conversationId={selectedConversationId}
                 onMessageSent={handleMessageSent}
                 placeholder={`Message ${conversation.title}...`}
@@ -194,7 +196,7 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
               </h2>
               <p className="text-muted-foreground mb-6">
                 Select a conversation from the sidebar to start chatting, or
-                create a new conversation to begin.
+                create a new conversation to begin. You can now send images and ask questions about them!
               </p>
 
               <Card className="text-left">
@@ -203,7 +205,8 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
                   <p>• Create a new conversation to start chatting</p>
-                  <p>• Send messages with text or file attachments</p>
+                  <p>• Send messages with text, images, or file attachments</p>
+                  <p>• Upload images and ask AI to analyze them</p>
                   <p>• View conversation summaries and analytics</p>
                   <p>
                     • Manage conversations with edit, archive, and delete
@@ -214,9 +217,9 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
 
               {/* Start New Conversation */}
               <div className="mt-6">
-                <MessageInput
+                <MessageInputWithImages
                   onMessageSent={handleMessageSent}
-                  placeholder="Start a new conversation..."
+                  placeholder="Start a new conversation with text or images..."
                 />
               </div>
             </div>

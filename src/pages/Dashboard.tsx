@@ -23,10 +23,34 @@ import {
 } from "recharts";
 import { useState } from "react";
 import {FileUpload} from "@/components/ui/file-upload";
+import { useTokenHandler } from "@/hooks/useTokenHandler";
+import NutritionLoadingAnimation from "@/components/NutritionLoadingAnimation";
+import ProgressiveLoadingAnimation from "@/components/ProgressiveLoadingAnimation";
 
 export default function Dashboard() {
   const { data, isLoading, error } = useIntakesToday();
   const [files, setFiles] = useState<File[]>([]);
+  const [showTokenProcessing, setShowTokenProcessing] = useState(false);
+  
+  // Handle OAuth tokens if present in URL
+  const { isProcessingTokens } = useTokenHandler({
+    onSuccess: (authData) => {
+      console.log("OAuth authentication successful:", authData);
+      // Token storage is already handled by the hook
+      // Additional logic can be added here if needed
+    },
+    onError: (error) => {
+      console.error("OAuth authentication error:", error);
+      // Error handling is already handled by the hook with toast
+    },
+    onProcessingStart: () => {
+      setShowTokenProcessing(true);
+    },
+    onProcessingEnd: () => {
+      setShowTokenProcessing(false);
+    },
+  });
+  
   const handleFileUpload = (files: File[]) => {
     setFiles(files);
     console.log(files);
@@ -101,6 +125,28 @@ export default function Dashboard() {
     const currentValue = parseFloat(current || "0");
     return Math.min((currentValue / goal) * 100, 100);
   };
+
+  // Show loading animation during token processing or initial data loading
+  if (showTokenProcessing || isProcessingTokens) {
+    return (
+      <NutritionLoadingAnimation 
+        message="Authenticating with Google..."
+        showProgress={false}
+      />
+    );
+  }
+
+  // Show progressive loading animation during data fetching
+  if (isLoading) {
+    return (
+      <ProgressiveLoadingAnimation 
+        onComplete={() => {
+          // This will be called when the animation completes
+          // The actual data loading state will naturally transition
+        }}
+      />
+    );
+  }
 
   return (
     <div className="container py-8 pb-24 space-y-8 relative z-10">

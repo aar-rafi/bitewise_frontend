@@ -8,6 +8,8 @@ const API_ENDPOINTS = {
     VERIFY_EMAIL: "/api/v1/auth/verify-email",
     VERIFY_LOGIN: "/api/v1/auth/verify-login",
     REFRESH_TOKEN: "/api/v1/auth/refresh",
+    GOOGLE_LOGIN: "/api/v1/auth/google/login",
+
 } as const;
 
 // Types for API requests and responses
@@ -68,6 +70,31 @@ export interface VerifyEmailResponse {
     access_token: string;
     token_type: string;
     expires_in: number;
+}
+
+export interface GoogleAuthRequest {
+    redirect_uri?: string;
+}
+
+export interface GoogleAuthInitResponse {
+    authorization_url: string;
+    state: string;
+}
+
+
+
+export interface GoogleAuthResponse {
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+    refresh_token: string;
+    user_id: string;
+    email: string;
+    username: string;
+    provider: string;
+    first_login: boolean;
+    profile_complete: boolean;
+    is_new_user: boolean;
 }
 
 export interface ValidationError {
@@ -296,6 +323,28 @@ export const authApi = {
     logout: () => {
         tokenStorage.clearTokens();
     },
+
+    initiateGoogleAuth: async (redirectUri?: string): Promise<GoogleAuthInitResponse> => {
+        const params = new URLSearchParams();
+        if (redirectUri) {
+            params.append('redirect_uri', redirectUri);
+        }
+        
+        const queryString = params.toString();
+        const endpoint = `${API_ENDPOINTS.GOOGLE_LOGIN}${queryString ? `?${queryString}` : ''}`;
+        
+        // Make API call to get authorization URL
+        const response = await apiCall<GoogleAuthInitResponse>(endpoint, {
+            method: "GET",
+        });
+        
+        // Redirect to Google OAuth URL
+        window.location.href = response.authorization_url;
+        
+        return response;
+    },
+
+
 };
 
 export interface NutritionalSummary {

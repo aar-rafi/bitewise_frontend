@@ -10,6 +10,7 @@ import TopDishesChart from '@/components/stats/TopDishesChart';
 import { useQuickStats, useComprehensiveStats } from '@/hooks/useStats';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import NutritionLoadingAnimation from '@/components/NutritionLoadingAnimation';
 
 type TimeUnit = 'hour' | 'day' | 'week' | 'month';
 
@@ -122,6 +123,16 @@ const Stats = () => {
             </CardContent>
         </Card>
     );
+
+    // Show full loading animation during initial load
+    if (quickLoading && comprehensiveLoading) {
+        return (
+            <NutritionLoadingAnimation 
+                message="Loading your nutrition statistics..."
+                showProgress={false}
+            />
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 p-4 pb-24">

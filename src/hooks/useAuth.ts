@@ -12,6 +12,10 @@ import {
     type VerifyLoginRequest,
     type VerifyLoginResponse,
     type RefreshTokenResponse,
+    type GoogleAuthRequest,
+    type GoogleAuthInitResponse,
+
+    type GoogleAuthResponse,
 } from "@/lib/api";
 
 interface UseRegisterOptions {
@@ -174,10 +178,37 @@ export const useRefreshToken = (options: UseRefreshTokenOptions = {}) => {
     };
 };
 
+interface UseGoogleAuthOptions {
+    onSuccess?: (data: GoogleAuthResponse) => void;
+    onError?: (error: ApiError) => void;
+}
+
+export const useGoogleAuth = (options: UseGoogleAuthOptions = {}) => {
+    const [isLoading, setIsLoading] = useState(false);
+
+    const initiateGoogleAuth = async (redirectUri?: string) => {
+        try {
+            setIsLoading(true);
+            await authApi.initiateGoogleAuth(redirectUri);
+        } catch (error) {
+            setIsLoading(false);
+            options.onError?.(error as ApiError);
+        }
+    };
+
+
+
+    return {
+        initiateGoogleAuth,
+        isLoading,
+    };
+};
+
 export default {
     useRegister,
     useLogin,
     useVerifyLogin,
     useVerifyEmail,
     useRefreshToken,
+    useGoogleAuth,
 }; 

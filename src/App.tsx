@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import BottomNavBar from "./components/BottomNavBar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTokenHandler } from "@/hooks/useTokenHandler";
 
 // Lazy load route components for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -15,6 +16,7 @@ const Chat = lazy(() => import("./pages/Chat"));
 const Stats = lazy(() => import("./pages/Stats"));
 const Profile = lazy(() => import("./pages/Profile"));
 const ProfileUpdate = lazy(() => import("./pages/ProfileUpdate"));
+
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -85,6 +87,12 @@ const NutritionFloatingBackground = () => {
   );
 };
 
+// Component to handle OAuth tokens globally
+const GlobalTokenHandler = () => {
+  useTokenHandler();
+  return null;
+};
+
 // Component to conditionally render BottomNavBar
 const ConditionalBottomNavBar = () => {
   const location = useLocation();
@@ -115,6 +123,9 @@ const App = () => {
             <NutritionFloatingBackground />
 
             <div className="relative z-10">
+              {/* Global token handler */}
+              <GlobalTokenHandler />
+              
               <Suspense fallback={<RouteLoader />}>
                 <Routes>
                   <Route path="/" element={<Index />} />
@@ -124,6 +135,7 @@ const App = () => {
                   <Route path="/stats" element={<Stats />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/profile/update" element={<ProfileUpdate />} />
+
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

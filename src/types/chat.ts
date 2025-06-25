@@ -15,8 +15,24 @@ export interface AttachmentDataFile {
     type: string;
 }
 
+// New interface for image attachments based on API documentation
+export interface ImageAttachment {
+    url: string;
+    filename: string;
+    size: number;
+    content_type: string;
+    storage_path: string;
+    metadata: {
+        file_size: number;
+        upload_timestamp: string;
+    };
+}
+
 export interface AttachmentData {
     files: AttachmentDataFile[];
+    images?: ImageAttachment[];
+    widgets?: unknown;
+    tool_results?: unknown;
 }
 
 export type MessageStatus = "sent" | "pending" | "failed" | "thinking";
@@ -27,7 +43,7 @@ export interface Message {
     user_id?: number;
     is_user_message: boolean;
     content: string;
-    message_type: "text" | "file" | "system_status";
+    message_type: "text" | "file" | "image" | "system_status";
     attachments?: AttachmentData | null;
     extra_data?: Record<string, unknown> | null;
     llm_model_id?: number | null;
@@ -89,7 +105,7 @@ export interface CreateMessageRequest {
 export interface SendChatRequest {
     message: string;
     conversation_id?: number;
-    message_type?: "text" | "file";
+    message_type?: "text" | "file" | "image";
     attachments?: AttachmentData;
     context?: Record<string, unknown>;
 }
@@ -107,4 +123,20 @@ export interface GetConversationsResponse {
     page: number;
     page_size: number;
     total_pages: number;
+}
+
+// New interface for chat with images request
+export interface ChatWithImagesRequest {
+    message: string;
+    conversation_id?: number;
+    images?: File[];
+}
+
+// New interface for chat with images response - matching the API documentation
+export interface ChatWithImagesResponse {
+    conversation_id: number;
+    user_message: Message;
+    ai_message: Message;
+    total_tokens_used: number;
+    cost_estimate?: number;
 } 

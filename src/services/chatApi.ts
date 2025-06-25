@@ -10,6 +10,8 @@ import {
     SendChatRequest,
     UpdateMessageRequest,
     GetConversationsResponse,
+    ChatWithImagesRequest,
+    ChatWithImagesResponse,
 } from '@/types/chat';
 import { authApi } from '@/lib/api';
 
@@ -23,6 +25,7 @@ const CHAT_API_ENDPOINTS = {
     MESSAGES: (conversationId: number) => `/api/v1/chat/conversations/${conversationId}/messages`,
     MESSAGE: (id: number) => `/api/v1/chat/messages/${id}`,
     CHAT: "/api/v1/chat/chat",
+    CHAT_WITH_IMAGES: "/api/v1/chat/chat-with-images",
     MARK_READ: (conversationId: number) => `/api/v1/chat/conversations/${conversationId}/mark-read`,
     SUMMARY: (conversationId: number) => `/api/v1/chat/conversations/${conversationId}/summary`,
 } as const;
@@ -116,6 +119,80 @@ async function chatApiCall<T>(
     }
 }
 
+// Specialized API call function for multipart/form-data requests
+async function chatFormDataApiCall<T>(
+    endpoint: string,
+    formData: FormData
+): Promise<T> {
+    const url = `${API_BASE_URL}${endpoint}`;
+    const accessToken = localStorage.getItem("access_token");
+
+    const headers: HeadersInit = {};
+    if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+    }
+    // Don't set Content-Type for FormData - let the browser set it with boundary
+
+    const config: RequestInit = {
+        method: 'POST',
+        headers,
+        body: formData,
+    };
+
+    try {
+        const response = await fetch(url, config);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+
+            // If 401 and we have a refresh token, try to refresh
+            if (response.status === 401) {
+                const refreshToken = localStorage.getItem("refresh_token");
+                if (refreshToken) {
+                    try {
+                        // Try to refresh the token using the existing auth API
+                        const refreshResponse = await authApi.refreshToken(refreshToken);
+
+                        // Retry the original request with new token
+                        const newHeaders = { ...headers };
+                        newHeaders["Authorization"] = `Bearer ${refreshResponse.access_token}`;
+
+                        const retryResponse = await fetch(url, {
+                            ...config,
+                            headers: newHeaders,
+                        });
+                        
+                        if (!retryResponse.ok) {
+                            throw new Error(`HTTP ${retryResponse.status}: ${retryResponse.statusText}`);
+                        }
+
+                        return await retryResponse.json();
+                    } catch (refreshError) {
+                        // Refresh failed, clear tokens
+                        localStorage.removeItem("access_token");
+                        localStorage.removeItem("refresh_token");
+                        localStorage.removeItem("token_expiry");
+                        throw new Error("Session expired. Please log in again.");
+                    }
+                }
+            }
+
+            throw new Error(
+                errorData.detail?.[0]?.msg ||
+                (typeof errorData.detail === 'string' ? errorData.detail : `HTTP ${response.status}: ${response.statusText}`)
+            );
+        }
+
+        return await response.json();
+
+    } catch (error) {
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Network error. Please check your connection and try again.");
+    }
+}
+
 export const chatApi = {
     // Conversation endpoints
     async createConversation(data: CreateConversationRequest): Promise<Conversation> {
@@ -193,6 +270,31 @@ export const chatApi = {
             method: 'POST',
             body: JSON.stringify(data),
         });
+    },
+
+    // New chat with images endpoint
+    async sendChatWithImages(data: ChatWithImagesRequest): Promise<ChatWithImagesResponse> {
+        const formData = new FormData();
+        
+        // Add text message
+        formData.append('message', data.message);
+        
+        // Add conversation ID if provided
+        if (data.conversation_id) {
+            formData.append('conversation_id', data.conversation_id.toString());
+        }
+        
+        // Add images if provided
+        if (data.images && data.images.length > 0) {
+            data.images.forEach((image) => {
+                formData.append('images', image);
+            });
+        }
+        
+        return chatFormDataApiCall<ChatWithImagesResponse>(
+            CHAT_API_ENDPOINTS.CHAT_WITH_IMAGES,
+            formData
+        );
     },
 
     // Utility endpoints

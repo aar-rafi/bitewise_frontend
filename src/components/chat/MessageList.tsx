@@ -11,12 +11,20 @@ import {
   Copy,
   Check,
   Loader2,
+  Download,
+  ZoomIn,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +41,168 @@ import { useToast } from "@/hooks/use-toast";
 
 interface MessageListProps {
   conversationId: number;
+}
+
+// Component for displaying images in messages
+function MessageImages({ message }: { message: Message }) {
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  
+  // Clean up blob URLs when component unmounts (only for user messages with local URLs)
+  useEffect(() => {
+    return () => {
+      if (message.is_user_message && message.extra_data?.use_local_urls && message.attachments?.images) {
+        message.attachments.images.forEach(image => {
+          if (image.url.startsWith('blob:')) {
+            URL.revokeObjectURL(image.url);
+          }
+        });
+      }
+    };
+  }, [message.is_user_message, message.extra_data?.use_local_urls, message.attachments?.images]);
+  
+  if (!message.attachments?.images || message.attachments.images.length === 0) {
+    return null;
+  }
+
+  const images = message.attachments.images;
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  return (
+    <>
+      <div className="mt-3 space-y-2">
+        {/* Images grid */}
+        <div className={`grid gap-2 ${
+          images.length === 1 
+            ? 'grid-cols-1' 
+            : images.length === 2 
+            ? 'grid-cols-2' 
+            : 'grid-cols-2 md:grid-cols-3'
+        }`}>
+          {images.map((image, index) => (
+            <div
+              key={index}
+              className="relative group rounded-lg overflow-hidden border cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => setSelectedImageIndex(index)}
+            >
+              <img
+                src={image.url}
+                alt={image.filename}
+                className="w-full h-32 object-cover"
+                loading="lazy"
+              />
+              
+              {/* Overlay with image info */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ZoomIn className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              
+              {/* Image number badge for multiple images */}
+              {images.length > 1 && (
+                <Badge 
+                  variant="secondary" 
+                  className="absolute top-1 left-1 h-5 w-5 p-0 rounded-full text-xs flex items-center justify-center"
+                >
+                  {index + 1}
+                </Badge>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Image metadata */}
+        <div className="flex flex-wrap gap-1">
+          {images.map((image, index) => (
+            <Badge key={index} variant="outline" className="text-xs">
+              {image.filename} ({formatFileSize(image.size)})
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      {/* Image viewer dialog */}
+      <Dialog open={selectedImageIndex !== null} onOpenChange={() => setSelectedImageIndex(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] p-2">
+          {selectedImageIndex !== null && (
+            <>
+              <DialogHeader className="px-4 py-2">
+                <DialogTitle className="flex items-center justify-between">
+                  <span>{images[selectedImageIndex].filename}</span>
+                  <div className="flex items-center gap-2">
+                    {images.length > 1 && (
+                      <span className="text-sm text-muted-foreground">
+                        {selectedImageIndex + 1} of {images.length}
+                      </span>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = images[selectedImageIndex].url;
+                        link.download = images[selectedImageIndex].filename;
+                        link.click();
+                      }}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="relative flex items-center justify-center p-4">
+                <img
+                  src={images[selectedImageIndex].url}
+                  alt={images[selectedImageIndex].filename}
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                />
+                
+                {/* Navigation buttons for multiple images */}
+                {images.length > 1 && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="absolute left-2 top-1/2 -translate-y-1/2"
+                      onClick={() => setSelectedImageIndex(
+                        selectedImageIndex === 0 ? images.length - 1 : selectedImageIndex - 1
+                      )}
+                    >
+                      ←
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2"
+                      onClick={() => setSelectedImageIndex(
+                        selectedImageIndex === images.length - 1 ? 0 : selectedImageIndex + 1
+                      )}
+                    >
+                      →
+                    </Button>
+                  </>
+                )}
+              </div>
+              
+              <div className="px-4 pb-2">
+                <div className="text-sm text-muted-foreground">
+                  {formatFileSize(images[selectedImageIndex].size)} • {images[selectedImageIndex].content_type}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }
 
 function MessageBubble({ message }: { message: Message }) {
@@ -293,13 +463,27 @@ function MessageBubble({ message }: { message: Message }) {
                 )}
               </div>
 
-              {message.message_type === "file" && message.attachments && (
+              {/* Display images ONLY for user messages - AI should never display images */}
+              {message.is_user_message && (message.message_type === "image" || (message.attachments?.images && message.attachments.images.length > 0)) && (
+                <MessageImages message={message} />
+              )}
+
+              {message.message_type === "file" && message.attachments && message.attachments.files && (
                 <div className="mt-2">
                   {message.attachments.files.map((file, idx) => (
                     <Badge key={idx} variant="outline" className="mr-1 mb-1">
                       {file.name} ({(file.size / 1024).toFixed(2)} KB)
                     </Badge>
                   ))}
+                </div>
+              )}
+
+              {/* Show additional metadata for image messages */}
+              {message.message_type === "image" && message.extra_data?.has_images && (
+                <div className="mt-2">
+                  <Badge variant="secondary" className="text-xs">
+                    {(message.extra_data.image_count as number) || 1} image{((message.extra_data.image_count as number) || 1) !== 1 ? 's' : ''} analyzed
+                  </Badge>
                 </div>
               )}
 

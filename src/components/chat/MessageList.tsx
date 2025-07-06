@@ -520,8 +520,6 @@ export function MessageList({ conversationId }: MessageListProps) {
     error,
   } = useMessages(conversationId);
 
-  console.log("MessageList messagesResponse:", messagesResponse);
-
   const [showMessages, setShowMessages] = useState(false);
 
   useEffect(() => {

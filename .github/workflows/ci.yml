@@ -2,7 +2,7 @@ name: Frontend CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, 'test/*']
   pull_request:
     branches: [main, develop]
 
@@ -25,6 +25,9 @@ jobs:
 
     # - name: Run linter
     #   run: npm run lint
+
+    - name: Run tests
+      run: npm test -- --run
 
     - name: Build project
       run: npm run build

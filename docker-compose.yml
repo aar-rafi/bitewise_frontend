@@ -1,7 +1,0 @@
-services:
-  frontend:
-    build: .
-    container_name: bitewise-frontend
-    ports:
-      - "3000:80"  # Host port 3000 -> Container port 80 (nginx default)
-    restart: unless-stopped 

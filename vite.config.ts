@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => ({
         '/api': {
           // target: 'https://bitewise.twiggle.tech',
           target: 'http://localhost:8000',
+          // target: 'http://4.240.113.91:8000',
           changeOrigin: true,
           // secure: true,
           secure: false,

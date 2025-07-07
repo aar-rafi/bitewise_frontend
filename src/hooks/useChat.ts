@@ -410,3 +410,27 @@ export function useConversationSummary(conversationId: number, maxLength?: numbe
         enabled: !!conversationId,
     });
 } 
+
+// Hook for confirming dish selection
+export function useConfirmDishSelection() {
+    const queryClient = useQueryClient();
+    
+    return useMutation({
+        mutationFn: ({ widgetId, dishId, portionSize }: { 
+            widgetId: string; 
+            dishId: number; 
+            portionSize: number; 
+        }) => chatApi.confirmDishSelection(widgetId, dishId, portionSize),
+        onSuccess: (data) => {
+            // Invalidate messages for the conversation
+            queryClient.invalidateQueries({
+                queryKey: chatKeys.messages(data.conversation_id)
+            });
+            
+            // Invalidate conversations list to update timestamps
+            queryClient.invalidateQueries({
+                queryKey: chatKeys.conversations()
+            });
+        },
+    });
+} 

@@ -38,6 +38,7 @@ import {
 } from "@/hooks/useChat";
 import { Message } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
+import { DishSelectionWidget } from "./DishSelectionWidget";
 
 interface MessageListProps {
   conversationId: number;
@@ -484,6 +485,14 @@ function MessageBubble({ message }: { message: Message }) {
                   <Badge variant="secondary" className="text-xs">
                     {(message.extra_data.image_count as number) || 1} image{((message.extra_data.image_count as number) || 1) !== 1 ? 's' : ''} analyzed
                   </Badge>
+                </div>
+              )}
+
+              {message.attachments?.widgets && message.attachments.widgets.length > 0 && (
+                <div className="mt-2 space-y-2">
+                  {message.attachments.widgets.map((widget) => (
+                    <DishSelectionWidget key={widget.widget_id} widget={widget} />
+                  ))}
                 </div>
               )}
 

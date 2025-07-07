@@ -28,11 +28,53 @@ export interface ImageAttachment {
     };
 }
 
+// Widget types and schemas based on backend implementation
+export type WidgetType = "dish_selection" | "confirmation" | "info_card";
+export type WidgetStatus = "pending" | "resolved" | "expired";
+
+export interface DishCard {
+    id: number;
+    name: string;
+    description?: string;
+    cuisine?: string;
+    image_url?: string;
+    calories?: number;
+    protein_g?: number;
+    carbs_g?: number;
+    fats_g?: number;
+    servings?: number;
+}
+
+export interface DishSelectionWidget {
+    widget_id: string;
+    widget_type: WidgetType;
+    status: WidgetStatus;
+    title: string;
+    description: string;
+    search_term: string;
+    extracted_portion?: number;
+    dishes: DishCard[];
+    selected_dish_id?: number;
+    selected_portion?: number;
+    metadata: Record<string, unknown>;
+    created_at?: string;
+    resolved_at?: string;
+}
+
+export interface ControlMessage {
+    type: "dish_confirmation";
+    widget_id: string;
+    dish_id: number;
+    portion_size: number;
+    metadata?: Record<string, unknown>;
+}
+
 export interface AttachmentData {
     files: AttachmentDataFile[];
     images?: ImageAttachment[];
-    widgets?: unknown;
+    widgets?: DishSelectionWidget[];
     tool_results?: unknown;
+    control_message?: ControlMessage;
 }
 
 export type MessageStatus = "sent" | "pending" | "failed" | "thinking";

@@ -313,4 +313,16 @@ export const chatApi = {
             `${CHAT_API_ENDPOINTS.SUMMARY(conversationId)}${params}`
         );
     },
+
+    // New dish confirmation endpoint
+    async confirmDishSelection(widgetId: string, dishId: number, portionSize: number): Promise<ChatResponse> {
+        return chatApiCall<ChatResponse>('/api/v1/chat/confirm-dish-selection', {
+            method: 'POST',
+            body: JSON.stringify({
+                widget_id: widgetId,
+                dish_id: dishId,
+                portion_size: portionSize,
+            }),
+        });
+    }
 }; 

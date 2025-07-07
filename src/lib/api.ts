@@ -507,6 +507,15 @@ export interface UpdateUserProfileRequest {
     push_notifications_enabled?: boolean;
 }
 
+export interface ProfilePictureUploadResponse {
+    success: boolean;
+    profile_image_url: string;
+    filename: string;
+    size: number;
+    metadata: Record<string, unknown>;
+    message: string;
+}
+
 export const profileApi = {
     getMe: async (): Promise<UserProfile> => {
         return apiCall<UserProfile>("/api/v1/profile/me", { method: "GET" });
@@ -516,6 +525,25 @@ export const profileApi = {
             method: "PUT",
             body: JSON.stringify(data),
         });
+    },
+    uploadProfilePicture: async (file: File): Promise<ProfilePictureUploadResponse> => {
+        const formData = new FormData();
+        formData.append("image", file);
+        
+        const response = await fetch(`${API_BASE_URL}/api/v1/profile/me/profile-picture`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${tokenStorage.getAccessToken()}`,
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ detail: "Upload failed" }));
+            throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        return response.json();
     },
 };
 

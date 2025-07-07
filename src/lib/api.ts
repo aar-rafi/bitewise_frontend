@@ -37,6 +37,16 @@ export interface LoginResponse {
     expires_in: number;
 }
 
+export interface DirectLoginResponse {
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+    refresh_token: string;
+    user_id: string;
+    message: string;
+    otp_required: boolean;
+}
+
 export interface VerifyLoginRequest {
     login_request_id: string;
     otp: string;
@@ -272,11 +282,22 @@ export const authApi = {
         });
     },
 
-    login: async (data: LoginRequest): Promise<LoginResponse> => {
-        return apiCall<LoginResponse>(API_ENDPOINTS.LOGIN, {
+    login: async (data: LoginRequest): Promise<LoginResponse | DirectLoginResponse> => {
+        const response = await apiCall<LoginResponse | DirectLoginResponse>(API_ENDPOINTS.LOGIN, {
             method: "POST",
             body: JSON.stringify(data),
         });
+
+        // If it's a direct login response (contains access_token), store the tokens
+        if ('access_token' in response) {
+            tokenStorage.setTokens(
+                response.access_token,
+                response.refresh_token,
+                response.expires_in
+            );
+        }
+
+        return response;
     },
 
     verifyLogin: async (data: VerifyLoginRequest): Promise<VerifyLoginResponse> => {

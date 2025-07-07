@@ -76,7 +76,14 @@ const Index = () => {
     isLoading: isLoginLoading,
     error: loginError,
   } = useLogin({
-    onSuccess: (data) => {
+    onDirectLogin: (data) => {
+      // Direct login successful - no OTP required
+      toast.success("Login successful - welcome back!");
+      // Navigate directly to dashboard
+      navigate("/dashboard");
+    },
+    onOtpRequired: (data) => {
+      // OTP verification required
       setLoginRequestId(data.login_request_id);
       setShowLoginOtp(true);
       toast.success("Please check your email for the verification code");

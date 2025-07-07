@@ -156,7 +156,7 @@ export default function Dashboard() {
         title="Today's Summary"
         subtitle="Track your nutritional journey"
       >
-        <LogIntakeDialog />
+        {/* <LogIntakeDialog /> */}
       </AppHeader>
 
       {/* Main Stats Grid */}

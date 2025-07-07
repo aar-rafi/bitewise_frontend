@@ -38,10 +38,7 @@ export interface DishCard {
     description?: string;
     cuisine?: string;
     image_url?: string;
-    calories?: number;
-    protein_g?: number;
-    carbs_g?: number;
-    fats_g?: number;
+    calories?: number;  // Simplified to just basic calorie info
     servings?: number;
 }
 
@@ -49,15 +46,11 @@ export interface DishSelectionWidget {
     widget_id: string;
     widget_type: WidgetType;
     status: WidgetStatus;
-    title: string;
-    description: string;
-    search_term: string;
-    extracted_portion?: number;
     dishes: DishCard[];
+    portion_size?: number;  // Add this field for initial portion size
+    // Fields for resolved widgets
     selected_dish_id?: number;
     selected_portion?: number;
-    metadata: Record<string, unknown>;
-    created_at?: string;
     resolved_at?: string;
 }
 

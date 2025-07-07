@@ -6,6 +6,7 @@ import { AlertCircle, TrendingUp, Droplets, Zap } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import LogIntakeDialog from "@/components/LogIntakeDialog";
 import AnimatedNumber from "@/components/AnimatedNumber";
+import AppHeader from "@/components/AppHeader";
 import {
   ChartContainer,
   ChartTooltip,
@@ -150,18 +151,13 @@ export default function Dashboard() {
 
   return (
     <div className="container py-8 pb-24 space-y-8 relative z-10">
-      {/* Header */}
-      <div className="flex justify-between items-center animate-fade-in">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-nutrition-green to-nutrition-emerald bg-clip-text text-transparent">
-            Today's Summary
-          </h1>
-          <p className="text-green-700/80 mt-1 font-medium">
-            Track your nutritional journey
-          </p>
-        </div>
+      {/* Header with logout functionality */}
+      <AppHeader 
+        title="Today's Summary"
+        subtitle="Track your nutritional journey"
+      >
         <LogIntakeDialog />
-      </div>
+      </AppHeader>
 
       {/* Main Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
@@ -420,9 +416,9 @@ export default function Dashboard() {
         </Card>
 
       </div>
-        <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-emerald-500/20 dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg">
+        {/* <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-emerald-500/20 dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg">
           <FileUpload onChange={handleFileUpload} />
-        </div>
+        </div> */}
     </div>
   );
 }

@@ -8,6 +8,7 @@ const API_ENDPOINTS = {
     VERIFY_EMAIL: "/api/v1/auth/verify-email",
     VERIFY_LOGIN: "/api/v1/auth/verify-login",
     REFRESH_TOKEN: "/api/v1/auth/refresh",
+    LOGOUT: "/api/v1/auth/logout",
     GOOGLE_LOGIN: "/api/v1/auth/google/login",
 
 } as const;
@@ -341,8 +342,19 @@ export const authApi = {
         return response;
     },
 
-    logout: () => {
-        tokenStorage.clearTokens();
+    logout: async () => {
+        try {
+            // Call backend to invalidate refresh tokens
+            await apiCall<{ message: string }>(API_ENDPOINTS.LOGOUT, {
+                method: "POST",
+            });
+        } catch (error) {
+            // Even if backend call fails, we should still clear local tokens
+            console.error("Error during logout API call:", error);
+        } finally {
+            // Always clear local tokens regardless of backend response
+            tokenStorage.clearTokens();
+        }
     },
 
     initiateGoogleAuth: async (redirectUri?: string): Promise<GoogleAuthInitResponse> => {

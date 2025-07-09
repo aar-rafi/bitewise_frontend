@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:clean": "rm -rf node_modules/.vite && vite",
+    "start": "vite preview --port 3000",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
@@ -13,7 +14,10 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "clean": "rm -rf node_modules/.vite dist",
-    "fresh": "rm -rf node_modules/.vite node_modules && npm install && npm run dev"
+    "fresh": "rm -rf node_modules/.vite node_modules && npm install && npm run dev",
+    "e2e": "cypress run",
+    "e2e:open": "cypress open",
+    "e2e:headed": "cypress run --headed"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -87,6 +91,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.10.1",
     "autoprefixer": "^10.4.20",
+    "cypress": "^14.5.1",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",

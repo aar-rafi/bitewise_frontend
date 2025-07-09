@@ -28,9 +28,11 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import Profile from "./Profile";
 import ProfileUpdate from "./ProfileUpdate";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { login: authLogin } = useAuth();
 
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -76,7 +78,25 @@ const Index = () => {
     isLoading: isLoginLoading,
     error: loginError,
   } = useLogin({
-    onSuccess: (data) => {
+    onDirectLogin: (data) => {
+      // Direct login successful - no OTP required
+      // Update auth context with user data and tokens
+      authLogin(
+        {
+          id: data.user_id,
+          email: email, // Use the email from the form
+          username: email.split('@')[0], // Temporary username from email
+        },
+        {
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          expires_in: data.expires_in,
+        }
+      );
+      // Navigation will be handled by AuthContext/PublicRoute
+    },
+    onOtpRequired: (data) => {
+      // OTP verification required
       setLoginRequestId(data.login_request_id);
       setShowLoginOtp(true);
       toast.success("Please check your email for the verification code");
@@ -89,14 +109,26 @@ const Index = () => {
   });
 
   const { verifyLogin, isLoading: isVerifyLoginLoading } = useVerifyLogin({
-    onSuccess: () => {
-      toast.success("Login successful!");
+    onSuccess: (data) => {
+      // Login verification successful
+      // Update auth context with user data and tokens
+      authLogin(
+        {
+          id: data.user_id,
+          email: email, // Use the email from the form
+          username: email.split('@')[0], // Temporary username from email
+        },
+        {
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          expires_in: data.expires_in,
+        }
+      );
       // Reset form and states
       setShowLoginOtp(false);
       setLoginOtp("");
       setLoginRequestId("");
-      // Navigate to dashboard
-      navigate("/dashboard");
+      // Navigation will be handled by AuthContext/PublicRoute
     },
     onError: (error) => {
       toast.error("Verification failed", {

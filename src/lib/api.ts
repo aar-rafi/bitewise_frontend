@@ -8,6 +8,7 @@ const API_ENDPOINTS = {
     VERIFY_EMAIL: "/api/v1/auth/verify-email",
     VERIFY_LOGIN: "/api/v1/auth/verify-login",
     REFRESH_TOKEN: "/api/v1/auth/refresh",
+    LOGOUT: "/api/v1/auth/logout",
     GOOGLE_LOGIN: "/api/v1/auth/google/login",
 
 } as const;
@@ -35,6 +36,16 @@ export interface LoginResponse {
     message: string;
     login_request_id: string;
     expires_in: number;
+}
+
+export interface DirectLoginResponse {
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+    refresh_token: string;
+    user_id: string;
+    message: string;
+    otp_required: boolean;
 }
 
 export interface VerifyLoginRequest {
@@ -272,11 +283,22 @@ export const authApi = {
         });
     },
 
-    login: async (data: LoginRequest): Promise<LoginResponse> => {
-        return apiCall<LoginResponse>(API_ENDPOINTS.LOGIN, {
+    login: async (data: LoginRequest): Promise<LoginResponse | DirectLoginResponse> => {
+        const response = await apiCall<LoginResponse | DirectLoginResponse>(API_ENDPOINTS.LOGIN, {
             method: "POST",
             body: JSON.stringify(data),
         });
+
+        // If it's a direct login response (contains access_token), store the tokens
+        if ('access_token' in response) {
+            tokenStorage.setTokens(
+                response.access_token,
+                response.refresh_token,
+                response.expires_in
+            );
+        }
+
+        return response;
     },
 
     verifyLogin: async (data: VerifyLoginRequest): Promise<VerifyLoginResponse> => {
@@ -320,8 +342,19 @@ export const authApi = {
         return response;
     },
 
-    logout: () => {
-        tokenStorage.clearTokens();
+    logout: async () => {
+        try {
+            // Call backend to invalidate refresh tokens
+            await apiCall<{ message: string }>(API_ENDPOINTS.LOGOUT, {
+                method: "POST",
+            });
+        } catch (error) {
+            // Even if backend call fails, we should still clear local tokens
+            console.error("Error during logout API call:", error);
+        } finally {
+            // Always clear local tokens regardless of backend response
+            tokenStorage.clearTokens();
+        }
     },
 
     initiateGoogleAuth: async (redirectUri?: string): Promise<GoogleAuthInitResponse> => {
@@ -474,6 +507,15 @@ export interface UpdateUserProfileRequest {
     push_notifications_enabled?: boolean;
 }
 
+export interface ProfilePictureUploadResponse {
+    success: boolean;
+    profile_image_url: string;
+    filename: string;
+    size: number;
+    metadata: Record<string, unknown>;
+    message: string;
+}
+
 export const profileApi = {
     getMe: async (): Promise<UserProfile> => {
         return apiCall<UserProfile>("/api/v1/profile/me", { method: "GET" });
@@ -483,6 +525,25 @@ export const profileApi = {
             method: "PUT",
             body: JSON.stringify(data),
         });
+    },
+    uploadProfilePicture: async (file: File): Promise<ProfilePictureUploadResponse> => {
+        const formData = new FormData();
+        formData.append("image", file);
+        
+        const response = await fetch(`${API_BASE_URL}/api/v1/profile/me/profile-picture`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${tokenStorage.getAccessToken()}`,
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ detail: "Upload failed" }));
+            throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        return response.json();
     },
 };
 

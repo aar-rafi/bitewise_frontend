@@ -12,9 +12,12 @@ export default defineConfig(({ mode }) => ({
     ...(mode === 'development' && {
       proxy: {
         '/api': {
-          target: 'https://bitewise.twiggle.tech',  // Your Azure VM backend
+          target: 'https://bitewise.twiggle.tech',
+          // target: 'http://localhost:8000',
+          // target: 'http://4.240.113.91:8000',
           changeOrigin: true,
           secure: true,
+          // secure: false,
           configure: (proxy, _options) => {
             proxy.on('error', (err, _req, _res) => {
               console.log('proxy error', err);

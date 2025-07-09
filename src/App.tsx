@@ -7,6 +7,9 @@ import { lazy, Suspense } from "react";
 import BottomNavBar from "./components/BottomNavBar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTokenHandler } from "@/hooks/useTokenHandler";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import PublicRoute from "@/components/PublicRoute";
 
 // Lazy load route components for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -36,74 +39,41 @@ const RouteLoader = () => (
   </div>
 );
 
-// Nutrition-themed floating background (only for login screen)
-const NutritionFloatingBackground = () => {
-  const location = useLocation();
-  
-  // Only show on login page
-  if (location.pathname !== "/") {
-    return null;
-  }
+// Nutrition-themed floating background elements
+const NutritionFloatingBackground = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    {/* Floating nutrition icons with subtle animations */}
+    <div className="absolute top-20 left-10 w-8 h-8 bg-nutrition-green/5 rounded-full animate-float-slow" />
+    <div className="absolute top-40 right-20 w-12 h-12 bg-nutrition-orange/5 rounded-full animate-float-medium" />
+    <div className="absolute bottom-32 left-1/4 w-6 h-6 bg-nutrition-emerald/5 rounded-full animate-float-fast" />
+    <div className="absolute bottom-20 right-1/3 w-10 h-10 bg-nutrition-amber/5 rounded-full animate-float-slow" />
+    <div className="absolute top-1/3 left-1/2 w-4 h-4 bg-nutrition-lime/5 rounded-full animate-float-medium" />
+  </div>
+);
 
-  return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {/* Floating nutrition elements */}
-      <div className="absolute top-20 left-20 w-36 h-16 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-xl animate-float"></div>
-      <div
-        className="absolute top-40 right-32 w-42 h-12 bg-gradient-to-br from-orange-400/25 to-yellow-500/25 rounded-full blur-lg animate-float"
-        style={{ animationDelay: "1s" }}
-      ></div>
-      <div
-        className="absolute bottom-20 left-32 w-20 h-20 bg-gradient-to-br from-red-400/20 to-pink-500/20 rounded-full blur-lg animate-float"
-        style={{ animationDelay: "2s" }}
-      ></div>
-      <div
-        className="absolute bottom-40 right-20 w-14 h-14 bg-gradient-to-br from-purple-400/20 to-indigo-500/20 rounded-full blur-xl animate-float"
-        style={{ animationDelay: "0.5s" }}
-      ></div>
-      <div
-        className="absolute top-1/3 left-1/2 w-20 h-10 bg-gradient-to-br from-lime-400/25 to-green-500/25 rounded-full blur-lg animate-float"
-        style={{ animationDelay: "1.5s" }}
-      ></div>
-      <div
-        className="absolute bottom-1/3 right-1/3 w-18 h-18 bg-gradient-to-br from-cyan-400/20 to-teal-500/20 rounded-full blur-xl animate-float"
-        style={{ animationDelay: "2.5s" }}
-      ></div>
-      
-      {/* Additional nutrition-themed floating elements */}
-      <div
-        className="absolute top-64 left-1/4 w-8 h-8 bg-gradient-to-br from-green-500/30 to-emerald-600/30 rounded-full blur-md animate-float"
-        style={{ animationDelay: "3s" }}
-      ></div>
-      <div
-        className="absolute bottom-64 right-1/4 w-24 h-24 bg-gradient-to-br from-yellow-400/15 to-orange-500/15 rounded-full blur-2xl animate-float"
-        style={{ animationDelay: "3.5s" }}
-      ></div>
-      <div
-        className="absolute top-3/4 right-16 w-16 h-16 bg-gradient-to-br from-violet-400/20 to-purple-500/20 rounded-full blur-lg animate-float"
-        style={{ animationDelay: "4.5s" }}
-      ></div>
-    </div>
-  );
-};
-
-// Component to handle OAuth tokens globally
+// Global token handler component
 const GlobalTokenHandler = () => {
-  useTokenHandler();
+  useTokenHandler({
+    onSuccess: (authData) => {
+      console.log("OAuth authentication successful:", authData);
+    },
+    onError: (error) => {
+      console.error("OAuth authentication error:", error);
+    },
+  });
   return null;
 };
 
-// Component to conditionally render BottomNavBar
+// Component to conditionally show bottom nav bar
 const ConditionalBottomNavBar = () => {
   const location = useLocation();
-
-  // Routes where BottomNavBar should NOT be shown
-  const routesWithoutNavBar = ["/", "/verify-email"];
-
-  if (routesWithoutNavBar.includes(location.pathname)) {
-    return null;
-  }
-
+  
+  // Don't show bottom nav on login/register/verify pages
+  const hideBottomNavRoutes = ['/', '/verify-email'];
+  const shouldHideBottomNav = hideBottomNavRoutes.includes(location.pathname);
+  
+  if (shouldHideBottomNav) return null;
+  
   return <BottomNavBar />;
 };
 
@@ -112,37 +82,93 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <BrowserRouter>
-          <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 relative overflow-hidden">
-            {/* Enhanced nutrition-themed background patterns */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(34,197,94,0.1),transparent_50%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(16,185,129,0.1),transparent_50%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(251,191,36,0.08),transparent_40%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(239,68,68,0.06),transparent_40%)]" />
+          <AuthProvider>
+            <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 relative overflow-hidden">
+              {/* Enhanced nutrition-themed background patterns */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(34,197,94,0.1),transparent_50%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(16,185,129,0.1),transparent_50%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(251,191,36,0.08),transparent_40%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(239,68,68,0.06),transparent_40%)]" />
 
-            {/* Floating nutrition-themed background elements */}
-            <NutritionFloatingBackground />
+              {/* Floating nutrition-themed background elements */}
+              <NutritionFloatingBackground />
 
-            <div className="relative z-10">
-              {/* Global token handler */}
-              <GlobalTokenHandler />
-              
-              <Suspense fallback={<RouteLoader />}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/verify-email" element={<VerifyEmail />} />
-                  <Route path="/chat" element={<Chat />} />
-                  <Route path="/stats" element={<Stats />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/profile/update" element={<ProfileUpdate />} />
+              <div className="relative z-10">
+                {/* Global token handler */}
+                <GlobalTokenHandler />
+                
+                <Suspense fallback={<RouteLoader />}>
+                  <Routes>
+                    {/* Public routes - redirect to dashboard if authenticated */}
+                    <Route 
+                      path="/" 
+                      element={
+                        <PublicRoute>
+                          <Index />
+                        </PublicRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/verify-email" 
+                      element={
+                        <PublicRoute>
+                          <VerifyEmail />
+                        </PublicRoute>
+                      } 
+                    />
 
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
+                    {/* Chat route - protected route requiring authentication */}
+                    <Route 
+                      path="/chat" 
+                      element={
+                        <ProtectedRoute>
+                          <Chat />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    {/* Protected routes - require authentication */}
+                    <Route 
+                      path="/dashboard" 
+                      element={
+                        <ProtectedRoute>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/stats" 
+                      element={
+                        <ProtectedRoute>
+                          <Stats />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/profile" 
+                      element={
+                        <ProtectedRoute>
+                          <Profile />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/profile/update" 
+                      element={
+                        <ProtectedRoute>
+                          <ProfileUpdate />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    {/* Catch-all route */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </div>
+              <ConditionalBottomNavBar />
             </div>
-            <ConditionalBottomNavBar />
-          </div>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
       <Toaster />

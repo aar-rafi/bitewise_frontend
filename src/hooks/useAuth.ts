@@ -9,6 +9,7 @@ import {
     type VerifyEmailResponse,
     type LoginRequest,
     type LoginResponse,
+    type DirectLoginResponse,
     type VerifyLoginRequest,
     type VerifyLoginResponse,
     type RefreshTokenResponse,
@@ -54,8 +55,10 @@ export const useRegister = (options: UseRegisterOptions = {}) => {
 };
 
 interface UseLoginOptions {
-    onSuccess?: (data: LoginResponse) => void;
+    onSuccess?: (data: LoginResponse | DirectLoginResponse) => void;
     onError?: (error: ApiError) => void;
+    onDirectLogin?: (data: DirectLoginResponse) => void;
+    onOtpRequired?: (data: LoginResponse) => void;
 }
 
 export const useLogin = (options: UseLoginOptions = {}) => {
@@ -65,6 +68,15 @@ export const useLogin = (options: UseLoginOptions = {}) => {
         mutationFn: (data: LoginRequest) => authApi.login(data),
         onSuccess: (data) => {
             setIsSuccess(true);
+            
+            // Check if it's a direct login (no OTP required)
+            if ('access_token' in data) {
+                options.onDirectLogin?.(data as DirectLoginResponse);
+            } else {
+                // OTP required
+                options.onOtpRequired?.(data as LoginResponse);
+            }
+            
             options.onSuccess?.(data);
         },
         onError: (error) => {

@@ -38,6 +38,8 @@ import {
 } from "@/hooks/useChat";
 import { Message } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
+import { DishSelectionWidget } from "./DishSelectionWidget";
+import { MarkdownMessage } from "./MarkdownMessage";
 
 interface MessageListProps {
   conversationId: number;
@@ -452,6 +454,7 @@ function MessageBubble({ message }: { message: Message }) {
                 )}
               </div>
 
+              {/* Message Content */}
               <div className="whitespace-pre-wrap break-words">
                 {isThinking ? (
                   <div className="flex items-center space-x-2 text-sm font-medium py-1">
@@ -459,7 +462,10 @@ function MessageBubble({ message }: { message: Message }) {
                     <span>{currentThinkingText}</span>
                   </div>
                 ) : (
-                  message.content
+                  <MarkdownMessage 
+                    content={message.content} 
+                    className={isUser ? "text-primary-foreground" : ""} 
+                  />
                 )}
               </div>
 
@@ -484,6 +490,14 @@ function MessageBubble({ message }: { message: Message }) {
                   <Badge variant="secondary" className="text-xs">
                     {(message.extra_data.image_count as number) || 1} image{((message.extra_data.image_count as number) || 1) !== 1 ? 's' : ''} analyzed
                   </Badge>
+                </div>
+              )}
+
+              {message.attachments?.widgets && message.attachments.widgets.length > 0 && (
+                <div className="mt-2 space-y-2">
+                  {message.attachments.widgets.map((widget) => (
+                    <DishSelectionWidget key={widget.widget_id} widget={widget} />
+                  ))}
                 </div>
               )}
 
@@ -603,7 +617,7 @@ export function MessageList({ conversationId }: MessageListProps) {
 
   return (
     <ScrollArea className="flex-1 p-4">
-      <div className="space-y-1">
+      <div className="space-y-4">
         {messagesToRender.map((message) => (
           <MessageBubble key={message.id} message={message} />
         ))}

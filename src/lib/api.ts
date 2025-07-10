@@ -526,6 +526,12 @@ export const profileApi = {
             body: JSON.stringify(data),
         });
     },
+    getMessageCount: async (): Promise<number> => {
+        return apiCall<number>("/api/v1/profile/message-count", { method: "GET" });
+    },
+    deleteMessages: async (): Promise<number> => {
+        return apiCall<number>("/api/v1/profile/delete-messages", {method: "GET"});
+    },
     uploadProfilePicture: async (file: File): Promise<ProfilePictureUploadResponse> => {
         const formData = new FormData();
         formData.append("image", file);

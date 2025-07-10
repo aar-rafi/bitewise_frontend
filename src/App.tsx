@@ -19,6 +19,7 @@ const Chat = lazy(() => import("./pages/Chat"));
 const Stats = lazy(() => import("./pages/Stats"));
 const Profile = lazy(() => import("./pages/Profile"));
 const ProfileUpdate = lazy(() => import("./pages/ProfileUpdate"));
+const Demo = lazy(() => import("./pages/Demo"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -133,6 +134,14 @@ const App = () => {
                       element={
                         <ProtectedRoute>
                           <Dashboard />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/demo" 
+                      element={
+                        <ProtectedRoute>
+                          <Demo />
                         </ProtectedRoute>
                       } 
                     />

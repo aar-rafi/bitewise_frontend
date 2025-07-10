@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, MessageSquare, LineChart, BarChart, User } from "lucide-react";
+import { Home, MessageSquare, LineChart, BarChart, User, Sparkles } from "lucide-react";
 
 export default function BottomNavBar() {
   const location = useLocation();
@@ -9,6 +9,7 @@ export default function BottomNavBar() {
     { path: "/stats", icon: LineChart, label: "Stats" },
     { path: "/chat", icon: MessageSquare, label: "Chat" },
     { path: "/profile", icon: User, label: "Profile" },
+    { path: "/demo", icon: Sparkles, label: "Demo" },
   ];
 
   return (

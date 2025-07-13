@@ -7,25 +7,13 @@ import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { User, MapPin, Mail, Cake, Ruler, Weight, Globe, Sparkles, Bell, BellOff } from "lucide-react";
-import { useTokenHandler } from "@/hooks/useTokenHandler";
 import NutritionLoadingAnimation from "@/components/NutritionLoadingAnimation";
 
 export default function Profile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showTokenProcessing, setShowTokenProcessing] = useState(false);
   const navigate = useNavigate();
-
-  // Handle OAuth tokens if present in URL
-  const { isProcessingTokens } = useTokenHandler({
-    onProcessingStart: () => {
-      setShowTokenProcessing(true);
-    },
-    onProcessingEnd: () => {
-      setShowTokenProcessing(false);
-    },
-  });
 
   useEffect(() => {
     profileApi.getMe()
@@ -35,15 +23,6 @@ export default function Profile() {
   }, []);
 
   // Show loading animation during token processing
-  if (showTokenProcessing || isProcessingTokens) {
-    return (
-      <NutritionLoadingAnimation 
-        message="Processing authentication..."
-        showProgress={false}
-      />
-    );
-  }
-
   if (loading) {
     return (
       <NutritionLoadingAnimation 

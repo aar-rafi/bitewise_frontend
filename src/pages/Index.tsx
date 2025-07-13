@@ -212,9 +212,9 @@ const Index = () => {
 
   const handleGoogleAuth = async () => {
     try {
-      // Redirect URI should point to your backend callback endpoint
-      // const redirectUri = `http://localhost:8080/dashboard`;
-      const redirectUri = `https://bitewise.twiggle.tech/dashboard`;
+      // Pass the frontend callback route as redirect_uri
+      // Backend will use this as 'state' and redirect here with tokens after authentication
+      const redirectUri = `${window.location.origin}/auth/google/callback`;
       await initiateGoogleAuth(redirectUri);
     } catch (error) {
       console.error("Google auth initiation failed:", error);

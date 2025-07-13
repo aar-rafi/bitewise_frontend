@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Store user data in localStorage for persistence
     localStorage.setItem('user_data', JSON.stringify(userData));
     
-    toast.success('Login successful!');
+    // Note: Toast notification is now handled by the specific login flow (GoogleCallback, regular login, etc.)
   };
 
   const logout = async () => {

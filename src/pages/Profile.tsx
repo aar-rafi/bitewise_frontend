@@ -104,7 +104,7 @@ export default function Profile() {
             <div>
               <div className="font-semibold text-green-800 mb-1">Medical Conditions</div>
               <div className="flex flex-wrap gap-1">
-                {profile.medical_conditions.length ? profile.medical_conditions.map((m, i) => (
+                {profile.medical_conditions?.length ? profile.medical_conditions.map((m, i) => (
                   <Badge key={i} variant="outline" className="bg-yellow-100 text-yellow-700 border-yellow-300">{m}</Badge>
                 )) : <span className="text-gray-400">None</span>}
               </div>
@@ -112,7 +112,7 @@ export default function Profile() {
             <div>
               <div className="font-semibold text-green-800 mb-1">Fitness Goals</div>
               <div className="flex flex-wrap gap-1">
-                {profile.fitness_goals.length ? profile.fitness_goals.map((f, i) => (
+                {profile.fitness_goals?.length ? profile.fitness_goals.map((f, i) => (
                   <Badge key={i} variant="outline" className="bg-emerald-100 text-emerald-700 border-emerald-300">{f}</Badge>
                 )) : <span className="text-gray-400">None</span>}
               </div>
@@ -120,7 +120,7 @@ export default function Profile() {
             <div>
               <div className="font-semibold text-green-800 mb-1">Taste Preferences</div>
               <div className="flex flex-wrap gap-1">
-                {profile.taste_preferences.length ? profile.taste_preferences.map((t, i) => (
+                {profile.taste_preferences?.length ? profile.taste_preferences.map((t, i) => (
                   <Badge key={i} variant="outline" className="bg-lime-100 text-lime-700 border-lime-300">{t}</Badge>
                 )) : <span className="text-gray-400">None</span>}
               </div>
@@ -128,7 +128,7 @@ export default function Profile() {
             <div>
               <div className="font-semibold text-green-800 mb-1">Cuisine Interests</div>
               <div className="flex flex-wrap gap-1">
-                {profile.cuisine_interests.length ? profile.cuisine_interests.map((c, i) => (
+                {profile.cuisine_interests?.length ? profile.cuisine_interests.map((c, i) => (
                   <Badge key={i} variant="outline" className="bg-cyan-100 text-cyan-700 border-cyan-300">{c}</Badge>
                 )) : <span className="text-gray-400">None</span>}
               </div>

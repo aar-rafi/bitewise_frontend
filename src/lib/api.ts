@@ -405,6 +405,203 @@ export interface Dish {
     sugar_g: string;
 }
 
+// Extended Dish interface matching DishResponse from backend
+export interface DishResponse {
+    id: number;
+    name: string;
+    description?: string;
+    cuisine?: string;
+    cooking_steps?: string[];
+    prep_time_minutes?: number;
+    cook_time_minutes?: number;
+    image_urls?: string[];
+    servings?: number;
+    created_by_user_id?: number;
+    created_at: string;
+    updated_at: string;
+    // Nutritional information
+    calories?: number;
+    protein_g?: number;
+    carbs_g?: number;
+    fats_g?: number;
+    sat_fats_g?: number;
+    unsat_fats_g?: number;
+    trans_fats_g?: number;
+    fiber_g?: number;
+    sugar_g?: number;
+    calcium_mg?: number;
+    iron_mg?: number;
+    potassium_mg?: number;
+    sodium_mg?: number;
+    zinc_mg?: number;
+    magnesium_mg?: number;
+    vit_a_mcg?: number;
+    vit_b1_mg?: number;
+    vit_b2_mg?: number;
+    vit_b3_mg?: number;
+    vit_b5_mg?: number;
+    vit_b6_mg?: number;
+    vit_b9_mcg?: number;
+    vit_b12_mcg?: number;
+    vit_c_mg?: number;
+    vit_d_mcg?: number;
+    vit_e_mg?: number;
+    vit_k_mcg?: number;
+}
+
+export interface DishListItem {
+    id: number;
+    name: string;
+    description?: string;
+    cuisine?: string;
+    prep_time_minutes?: number;
+    cook_time_minutes?: number;
+    servings?: number;
+    image_urls?: string[];
+    created_by_user_id?: number;
+    created_at: string;
+    calories?: number;
+    protein_g?: number;
+    carbs_g?: number;
+    fats_g?: number;
+}
+
+export interface DishListResponse {
+    dishes: DishListItem[];
+    total_count: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+}
+
+export interface DishUpdateRequest {
+    name?: string;
+    description?: string;
+    cuisine?: string;
+    cooking_steps?: string[];
+    prep_time_minutes?: number;
+    cook_time_minutes?: number;
+    image_urls?: string[];
+    servings?: number;
+    calories?: number;
+    protein_g?: number;
+    carbs_g?: number;
+    fats_g?: number;
+    sat_fats_g?: number;
+    unsat_fats_g?: number;
+    trans_fats_g?: number;
+    fiber_g?: number;
+    sugar_g?: number;
+    calcium_mg?: number;
+    iron_mg?: number;
+    potassium_mg?: number;
+    sodium_mg?: number;
+    zinc_mg?: number;
+    magnesium_mg?: number;
+    vit_a_mcg?: number;
+    vit_b1_mg?: number;
+    vit_b2_mg?: number;
+    vit_b3_mg?: number;
+    vit_b5_mg?: number;
+    vit_b6_mg?: number;
+    vit_b9_mcg?: number;
+    vit_b12_mcg?: number;
+    vit_c_mg?: number;
+    vit_d_mcg?: number;
+    vit_e_mg?: number;
+    vit_k_mcg?: number;
+}
+
+export interface DishCreateRequest {
+    name: string;
+    description?: string;
+    cuisine?: string;
+    cooking_steps?: string[];
+    prep_time_minutes?: number;
+    cook_time_minutes?: number;
+    image_urls?: string[];
+    servings?: number;
+    calories?: number;
+    protein_g?: number;
+    carbs_g?: number;
+    fats_g?: number;
+    sat_fats_g?: number;
+    unsat_fats_g?: number;
+    trans_fats_g?: number;
+    fiber_g?: number;
+    sugar_g?: number;
+    calcium_mg?: number;
+    iron_mg?: number;
+    potassium_mg?: number;
+    sodium_mg?: number;
+    zinc_mg?: number;
+    magnesium_mg?: number;
+    vit_a_mcg?: number;
+    vit_b1_mg?: number;
+    vit_b2_mg?: number;
+    vit_b3_mg?: number;
+    vit_b5_mg?: number;
+    vit_b6_mg?: number;
+    vit_b9_mcg?: number;
+    vit_b12_mcg?: number;
+    vit_c_mg?: number;
+    vit_d_mcg?: number;
+    vit_e_mg?: number;
+    vit_k_mcg?: number;
+}
+
+export interface DishFilterParams {
+    search?: string;
+    cuisine?: string;
+    has_image?: boolean;
+    min_prep_time?: number;
+    max_prep_time?: number;
+    min_cook_time?: number;
+    max_cook_time?: number;
+    min_servings?: number;
+    max_servings?: number;
+    min_calories?: number;
+    max_calories?: number;
+    min_protein?: number;
+    max_protein?: number;
+    min_carbs?: number;
+    max_carbs?: number;
+    min_fats?: number;
+    max_fats?: number;
+    min_sugar?: number;
+    max_sugar?: number;
+}
+
+export interface IntakeFilterParams {
+    // Intake-specific filters
+    min_intake_time?: string; // ISO format datetime string
+    max_intake_time?: string; // ISO format datetime string
+    min_portion_size?: number;
+    max_portion_size?: number;
+    min_water_ml?: number;
+    max_water_ml?: number;
+    // Dish-based filters
+    dish_search?: string;
+    cuisine?: string;
+    has_image?: boolean;
+    min_prep_time?: number;
+    max_prep_time?: number;
+    min_cook_time?: number;
+    max_cook_time?: number;
+    min_servings?: number;
+    max_servings?: number;
+    min_calories?: number;
+    max_calories?: number;
+    min_protein?: number;
+    max_protein?: number;
+    min_carbs?: number;
+    max_carbs?: number;
+    min_fats?: number;
+    max_fats?: number;
+    min_sugar?: number;
+    max_sugar?: number;
+}
+
 export interface Intake {
     id: number;
     dish_id: number;
@@ -451,6 +648,66 @@ export const intakesApi = {
             //     Authorization: `Bearer ${tokenStorage.getAccessToken()}`,
             // },
             body: JSON.stringify(data),
+        });
+    },
+
+    getAll: async (page = 1, page_size = 20): Promise<TodayIntakesResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        return apiCall<TodayIntakesResponse>(`/api/v1/intakes?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    filter: async (filters: IntakeFilterParams, page = 1, page_size = 20): Promise<TodayIntakesResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        // Add all filter parameters
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                params.append(key, value.toString());
+            }
+        });
+        
+        return apiCall<TodayIntakesResponse>(`/api/v1/intakes/filter?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    getById: async (intakeId: number): Promise<Intake> => {
+        return apiCall<Intake>(`/api/v1/intakes/${intakeId}`, {
+            method: "GET",
+        });
+    },
+
+    update: async (intakeId: number, data: Partial<CreateIntakeRequest>): Promise<Intake> => {
+        return apiCall<Intake>(`/api/v1/intakes/${intakeId}`, {
+            method: "PUT",
+            body: JSON.stringify(data),
+        });
+    },
+
+    delete: async (intakeId: number): Promise<void> => {
+        return apiCall<void>(`/api/v1/intakes/${intakeId}`, {
+            method: "DELETE",
+        });
+    },
+
+    searchDishes: async (search: string, page = 1, page_size = 10): Promise<DishListResponse> => {
+        const params = new URLSearchParams({
+            search: search,
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        return apiCall<DishListResponse>(`/api/v1/dishes?${params.toString()}`, {
+            method: "GET",
         });
     },
 };
@@ -553,8 +810,69 @@ export const profileApi = {
     },
 };
 
+export const dishesApi = {
+    search: async (search?: string, page = 1, page_size = 20): Promise<DishListResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        if (search) {
+            params.append('search', search);
+        }
+        
+        return apiCall<DishListResponse>(`/api/v1/dishes?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    filter: async (filters: DishFilterParams, page = 1, page_size = 20): Promise<DishListResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        // Add all filter parameters
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                params.append(key, value.toString());
+            }
+        });
+        
+        return apiCall<DishListResponse>(`/api/v1/dishes/filter?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    create: async (data: DishCreateRequest): Promise<DishResponse> => {
+        return apiCall<DishResponse>(`/api/v1/dishes`, {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
+    },
+
+    getById: async (dishId: number): Promise<DishResponse> => {
+        return apiCall<DishResponse>(`/api/v1/dishes/${dishId}`, {
+            method: "GET",
+        });
+    },
+
+    update: async (dishId: number, data: DishUpdateRequest): Promise<DishResponse> => {
+        return apiCall<DishResponse>(`/api/v1/dishes/${dishId}`, {
+            method: "PUT",
+            body: JSON.stringify(data),
+        });
+    },
+
+    delete: async (dishId: number): Promise<void> => {
+        return apiCall<void>(`/api/v1/dishes/${dishId}`, {
+            method: "DELETE",
+        });
+    },
+};
+
 export default {
     authApi,
     intakesApi,
     profileApi,
+    dishesApi,
 };

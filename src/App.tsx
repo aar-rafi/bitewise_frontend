@@ -20,6 +20,8 @@ const Stats = lazy(() => import("./pages/Stats"));
 const Profile = lazy(() => import("./pages/Profile"));
 const ProfileUpdate = lazy(() => import("./pages/ProfileUpdate"));
 const Demo = lazy(() => import("./pages/Demo"));
+const Dishes = lazy(() => import("./pages/Dishes"));
+const Intakes = lazy(() => import("./pages/Intakes"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -130,6 +132,22 @@ const App = () => {
                       element={
                         <ProtectedRoute>
                           <Demo />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/dishes" 
+                      element={
+                        <ProtectedRoute>
+                          <Dishes />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/intakes" 
+                      element={
+                        <ProtectedRoute>
+                          <Intakes />
                         </ProtectedRoute>
                       } 
                     />

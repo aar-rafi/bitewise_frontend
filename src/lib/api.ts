@@ -215,7 +215,10 @@ async function apiCall<T>(
 
         // Handle cases where response might be empty (e.g., 204 No Content)
         const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
+        if (response.status === 204) {
+            // For 204 No Content, return undefined (void)
+            return undefined as T;
+        } else if (contentType && contentType.indexOf("application/json") !== -1) {
             return await response.json();
         } else {
             // For non-JSON responses or empty responses, return a success indicator or the response object itself
@@ -694,7 +697,7 @@ export const intakesApi = {
     },
 
     delete: async (intakeId: number): Promise<void> => {
-        return apiCall<void>(`/api/v1/intakes/${intakeId}`, {
+        await apiCall<void>(`/api/v1/intakes/${intakeId}`, {
             method: "DELETE",
         });
     },
@@ -864,7 +867,7 @@ export const dishesApi = {
     },
 
     delete: async (dishId: number): Promise<void> => {
-        return apiCall<void>(`/api/v1/dishes/${dishId}`, {
+        await apiCall<void>(`/api/v1/dishes/${dishId}`, {
             method: "DELETE",
         });
     },

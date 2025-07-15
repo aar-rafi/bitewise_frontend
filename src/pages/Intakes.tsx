@@ -9,6 +9,7 @@ import { Grid } from '@/components/ui/grid';
 import { intakesApi, TodayIntakesResponse, Intake, IntakeFilterParams } from '@/lib/api';
 import IntakeComponent from '@/components/IntakeComponent';
 import IntakeCreateComponent from '@/components/IntakeCreateComponent';
+import DateTimePicker from '@/components/DateTimePicker';
 import { toast } from 'sonner';
 
 const Intakes: React.FC = () => {
@@ -256,24 +257,18 @@ const Intakes: React.FC = () => {
                             <HStack spacing={1}>
                                 <Box style={{ flex: 1 }}>
                                     <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>From Date/Time:</p>
-                                    <Input
-                                        type="datetime-local"
-                                        value={formatDateTimeLocal(filters.min_intake_time)}
-                                        onChange={(e) => {
-                                            const isoDate = e.target.value ? new Date(e.target.value).toISOString() : undefined;
-                                            handleFilterChange('min_intake_time', isoDate);
-                                        }}
+                                    <DateTimePicker
+                                        value={filters.min_intake_time || ''}
+                                        onChange={(isoDate) => handleFilterChange('min_intake_time', isoDate)}
+                                        placeholder="Select start date/time"
                                     />
                                 </Box>
                                 <Box style={{ flex: 1 }}>
                                     <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>To Date/Time:</p>
-                                    <Input
-                                        type="datetime-local"
-                                        value={formatDateTimeLocal(filters.max_intake_time)}
-                                        onChange={(e) => {
-                                            const isoDate = e.target.value ? new Date(e.target.value).toISOString() : undefined;
-                                            handleFilterChange('max_intake_time', isoDate);
-                                        }}
+                                    <DateTimePicker
+                                        value={filters.max_intake_time || ''}
+                                        onChange={(isoDate) => handleFilterChange('max_intake_time', isoDate)}
+                                        placeholder="Select end date/time"
                                     />
                                 </Box>
                             </HStack>

@@ -7,6 +7,7 @@ import { HStack } from '@/components/ui/hstack';
 import { Box } from '@/components/ui/box';
 import { intakesApi, CreateIntakeRequest, Intake, DishListResponse, Dish } from '@/lib/api';
 import DishBriefComponent from './DishBriefComponent';
+import DateTimePicker from './DateTimePicker';
 import { toast } from 'sonner';
 
 interface IntakeCreateComponentProps {
@@ -235,13 +236,10 @@ const IntakeCreateComponent: React.FC<IntakeCreateComponentProps> = ({ onIntakeC
                     <HStack spacing={1}>
                         <Box style={{ flex: 1 }}>
                             <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Intake Time:</p>
-                            <Input
-                                type="datetime-local"
-                                value={formatDateTimeLocal(createData.intake_time)}
-                                onChange={(e) => {
-                                    const isoDate = new Date(e.target.value).toISOString();
-                                    handleInputChange('intake_time', isoDate);
-                                }}
+                            <DateTimePicker
+                                value={createData.intake_time}
+                                onChange={(isoDate) => handleInputChange('intake_time', isoDate)}
+                                placeholder="Select intake time"
                             />
                         </Box>
                         

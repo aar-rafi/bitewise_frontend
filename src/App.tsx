@@ -20,11 +20,14 @@ const Stats = lazy(() => import("./pages/Stats"));
 const Profile = lazy(() => import("./pages/Profile"));
 const ProfileUpdate = lazy(() => import("./pages/ProfileUpdate"));
 const Demo = lazy(() => import("./pages/Demo"));
+
 const Dishes = lazy(() => import("./pages/Dishes"));
 const Intakes = lazy(() => import("./pages/Intakes"));
 const Messages = lazy(() => import("./pages/Messages"));
 const Conversations = lazy(() => import("./pages/Conversations"));
 const Users = lazy(() => import("./pages/Users"));
+
+
 
 // Detail pages for individual entities
 const DishDetail = lazy(() => import("./pages/DishDetail"));

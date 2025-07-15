@@ -6,18 +6,20 @@ export default function BottomNavBar() {
 
   const navItems = [
     { path: "/dashboard", icon: Home, label: "Home" },
-    { path: "/intakes", icon: Utensils, label: "Intakes" },
-    { path: "/dishes", icon: ForkKnifeCrossed, label: "Dishes" },
-    { path: "/messages", icon: Mail, label: "Messages" },
-    { path: "/conversations", icon: MessageCircle, label: "Conversations" },
-    { path: "/users", icon: Users, label: "Users" },
+
+    // { path: "/intakes", icon: Utensils, label: "Intakes" },
+    // { path: "/dishes", icon: ForkKnifeCrossed, label: "Dishes" },
+    // { path: "/messages", icon: Mail, label: "Messages" },
+    // { path: "/conversations", icon: MessageCircle, label: "Conversations" },
+    // { path: "/users", icon: Users, label: "Users" },
+
     { path: "/stats", icon: LineChart, label: "Stats" },
     { path: "/chat", icon: MessageSquare, label: "Chat" },
     { path: "/profile", icon: User, label: "Profile" },
   ];
 
   return (
-    <nav className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-6xl mx-4 bg-white/20 backdrop-blur-xl border-2 border-white/40 rounded-2xl shadow-2xl z-[100] transition-all duration-300 ease-in-out hover:shadow-3xl hover:bg-white/25 pointer-events-auto">
+    <nav className="fixed bottom-2 left-1/2 transform -translate-x-1/2 w-full max-w-6xl mx-4 bg-white/20 backdrop-blur-xl border-2 border-white/40 rounded-2xl shadow-2xl z-[100] transition-all duration-300 ease-in-out hover:shadow-3xl hover:bg-white/25 pointer-events-auto">
       <div className="flex justify-around items-center h-16 px-2 overflow-x-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;

@@ -24,33 +24,12 @@ import {
 } from "recharts";
 import { useState } from "react";
 import {FileUpload} from "@/components/ui/file-upload";
-import { useTokenHandler } from "@/hooks/useTokenHandler";
 import NutritionLoadingAnimation from "@/components/NutritionLoadingAnimation";
 import ProgressiveLoadingAnimation from "@/components/ProgressiveLoadingAnimation";
 
 export default function Dashboard() {
   const { data, isLoading, error } = useIntakesToday();
   const [files, setFiles] = useState<File[]>([]);
-  const [showTokenProcessing, setShowTokenProcessing] = useState(false);
-  
-  // Handle OAuth tokens if present in URL
-  const { isProcessingTokens } = useTokenHandler({
-    onSuccess: (authData) => {
-      console.log("OAuth authentication successful:", authData);
-      // Token storage is already handled by the hook
-      // Additional logic can be added here if needed
-    },
-    onError: (error) => {
-      console.error("OAuth authentication error:", error);
-      // Error handling is already handled by the hook with toast
-    },
-    onProcessingStart: () => {
-      setShowTokenProcessing(true);
-    },
-    onProcessingEnd: () => {
-      setShowTokenProcessing(false);
-    },
-  });
   
   const handleFileUpload = (files: File[]) => {
     setFiles(files);
@@ -128,7 +107,7 @@ export default function Dashboard() {
   };
 
   // Show loading animation during token processing or initial data loading
-  if (showTokenProcessing || isProcessingTokens) {
+  if (isLoading) {
     return (
       <NutritionLoadingAnimation 
         message="Authenticating with Google..."

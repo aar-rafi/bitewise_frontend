@@ -7,25 +7,13 @@ import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { User, MapPin, Mail, Cake, Ruler, Weight, Globe, Sparkles, Bell, BellOff } from "lucide-react";
-import { useTokenHandler } from "@/hooks/useTokenHandler";
 import NutritionLoadingAnimation from "@/components/NutritionLoadingAnimation";
 
 export default function Profile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showTokenProcessing, setShowTokenProcessing] = useState(false);
   const navigate = useNavigate();
-
-  // Handle OAuth tokens if present in URL
-  const { isProcessingTokens } = useTokenHandler({
-    onProcessingStart: () => {
-      setShowTokenProcessing(true);
-    },
-    onProcessingEnd: () => {
-      setShowTokenProcessing(false);
-    },
-  });
 
   useEffect(() => {
     profileApi.getMe()
@@ -35,15 +23,6 @@ export default function Profile() {
   }, []);
 
   // Show loading animation during token processing
-  if (showTokenProcessing || isProcessingTokens) {
-    return (
-      <NutritionLoadingAnimation 
-        message="Processing authentication..."
-        showProgress={false}
-      />
-    );
-  }
-
   if (loading) {
     return (
       <NutritionLoadingAnimation 
@@ -125,7 +104,7 @@ export default function Profile() {
             <div>
               <div className="font-semibold text-green-800 mb-1">Medical Conditions</div>
               <div className="flex flex-wrap gap-1">
-                {profile.medical_conditions.length ? profile.medical_conditions.map((m, i) => (
+                {profile.medical_conditions?.length ? profile.medical_conditions.map((m, i) => (
                   <Badge key={i} variant="outline" className="bg-yellow-100 text-yellow-700 border-yellow-300">{m}</Badge>
                 )) : <span className="text-gray-400">None</span>}
               </div>
@@ -133,7 +112,7 @@ export default function Profile() {
             <div>
               <div className="font-semibold text-green-800 mb-1">Fitness Goals</div>
               <div className="flex flex-wrap gap-1">
-                {profile.fitness_goals.length ? profile.fitness_goals.map((f, i) => (
+                {profile.fitness_goals?.length ? profile.fitness_goals.map((f, i) => (
                   <Badge key={i} variant="outline" className="bg-emerald-100 text-emerald-700 border-emerald-300">{f}</Badge>
                 )) : <span className="text-gray-400">None</span>}
               </div>
@@ -141,7 +120,7 @@ export default function Profile() {
             <div>
               <div className="font-semibold text-green-800 mb-1">Taste Preferences</div>
               <div className="flex flex-wrap gap-1">
-                {profile.taste_preferences.length ? profile.taste_preferences.map((t, i) => (
+                {profile.taste_preferences?.length ? profile.taste_preferences.map((t, i) => (
                   <Badge key={i} variant="outline" className="bg-lime-100 text-lime-700 border-lime-300">{t}</Badge>
                 )) : <span className="text-gray-400">None</span>}
               </div>
@@ -149,7 +128,7 @@ export default function Profile() {
             <div>
               <div className="font-semibold text-green-800 mb-1">Cuisine Interests</div>
               <div className="flex flex-wrap gap-1">
-                {profile.cuisine_interests.length ? profile.cuisine_interests.map((c, i) => (
+                {profile.cuisine_interests?.length ? profile.cuisine_interests.map((c, i) => (
                   <Badge key={i} variant="outline" className="bg-cyan-100 text-cyan-700 border-cyan-300">{c}</Badge>
                 )) : <span className="text-gray-400">None</span>}
               </div>

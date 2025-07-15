@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import BottomNavBar from "./components/BottomNavBar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTokenHandler } from "@/hooks/useTokenHandler";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PublicRoute from "@/components/PublicRoute";
@@ -15,6 +14,7 @@ import PublicRoute from "@/components/PublicRoute";
 const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const GoogleCallback = lazy(() => import("./pages/GoogleCallback"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Stats = lazy(() => import("./pages/Stats"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -40,37 +40,22 @@ const RouteLoader = () => (
   </div>
 );
 
-// Nutrition-themed floating background elements
+// Helper component for background patterns
 const NutritionFloatingBackground = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {/* Floating nutrition icons with subtle animations */}
-    <div className="absolute top-20 left-10 w-8 h-8 bg-nutrition-green/5 rounded-full animate-float-slow" />
-    <div className="absolute top-40 right-20 w-12 h-12 bg-nutrition-orange/5 rounded-full animate-float-medium" />
-    <div className="absolute bottom-32 left-1/4 w-6 h-6 bg-nutrition-emerald/5 rounded-full animate-float-fast" />
-    <div className="absolute bottom-20 right-1/3 w-10 h-10 bg-nutrition-amber/5 rounded-full animate-float-slow" />
-    <div className="absolute top-1/3 left-1/2 w-4 h-4 bg-nutrition-lime/5 rounded-full animate-float-medium" />
+    <div className="absolute top-20 left-10 w-6 h-6 bg-green-200 rounded-full opacity-20 animate-bounce" style={{ animationDelay: '0s', animationDuration: '3s' }} />
+    <div className="absolute top-40 right-20 w-4 h-4 bg-orange-200 rounded-full opacity-20 animate-bounce" style={{ animationDelay: '1s', animationDuration: '4s' }} />
+    <div className="absolute bottom-40 left-20 w-5 h-5 bg-yellow-200 rounded-full opacity-20 animate-bounce" style={{ animationDelay: '2s', animationDuration: '3.5s' }} />
+    <div className="absolute bottom-20 right-10 w-3 h-3 bg-red-200 rounded-full opacity-20 animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '5s' }} />
   </div>
 );
-
-// Global token handler component
-const GlobalTokenHandler = () => {
-  useTokenHandler({
-    onSuccess: (authData) => {
-      console.log("OAuth authentication successful:", authData);
-    },
-    onError: (error) => {
-      console.error("OAuth authentication error:", error);
-    },
-  });
-  return null;
-};
 
 // Component to conditionally show bottom nav bar
 const ConditionalBottomNavBar = () => {
   const location = useLocation();
   
-  // Don't show bottom nav on login/register/verify pages
-  const hideBottomNavRoutes = ['/', '/verify-email'];
+  // Don't show bottom nav on login/register/verify pages and Google callback
+  const hideBottomNavRoutes = ['/', '/verify-email', '/auth/google/callback'];
   const shouldHideBottomNav = hideBottomNavRoutes.includes(location.pathname);
   
   if (shouldHideBottomNav) return null;
@@ -95,9 +80,6 @@ const App = () => {
               <NutritionFloatingBackground />
 
               <div className="relative z-10">
-                {/* Global token handler */}
-                <GlobalTokenHandler />
-                
                 <Suspense fallback={<RouteLoader />}>
                   <Routes>
                     {/* Public routes - redirect to dashboard if authenticated */}
@@ -116,6 +98,12 @@ const App = () => {
                           <VerifyEmail />
                         </PublicRoute>
                       } 
+                    />
+
+                    {/* Google OAuth callback route - public but handles authentication */}
+                    <Route 
+                      path="/auth/google/callback" 
+                      element={<GoogleCallback />} 
                     />
 
                     {/* Chat route - protected route requiring authentication */}

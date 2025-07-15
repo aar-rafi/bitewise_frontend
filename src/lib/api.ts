@@ -873,9 +873,369 @@ export const dishesApi = {
     },
 };
 
+// Types for Messages API
+export interface Message {
+    id: number;
+    conversation_id: number;
+    user_id: number;
+    content: string;
+    is_user_message: boolean;
+    llm_model_id: number | null;
+    input_tokens: number | null;
+    output_tokens: number | null;
+    parent_message_id: number | null;
+    message_type: string;
+    attachments?: Record<string, unknown>;
+    reactions?: Record<string, unknown>;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    extra_data?: Record<string, unknown>;
+}
+
+export interface MessageListResponse {
+    messages: Message[];
+    total_count: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+}
+
+export interface MessageCreateRequest {
+    content: string;
+    message_type?: string;
+    attachments?: Record<string, unknown>;
+    extra_data?: Record<string, unknown>;
+    parent_message_id?: number;
+}
+
+export interface MessageUpdateRequest {
+    content?: string;
+    status?: string;
+    reactions?: Record<string, unknown>;
+    extra_data?: Record<string, unknown>;
+}
+
+export interface MessageFilterParams {
+    search?: string; // Search in content
+    conversation_id?: number; // Filter by conversation ID
+    is_user_message?: boolean;
+    message_type?: string;
+    status?: string;
+    min_created_at?: string;
+    max_created_at?: string;
+    has_attachments?: boolean;
+    min_tokens?: number;
+    max_tokens?: number;
+}
+
+// Types for Conversations API
+export interface Conversation {
+    id: number;
+    user_id: number;
+    title?: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    extra_data?: Record<string, unknown>;
+    last_message_preview?: string;
+    last_message_time?: string;
+    unread_count?: number;
+}
+
+export interface ConversationListResponse {
+    conversations: Conversation[];
+    total_count: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+}
+
+export interface ConversationCreateRequest {
+    title?: string;
+    extra_data?: Record<string, unknown>;
+}
+
+export interface ConversationUpdateRequest {
+    title?: string;
+    status?: string;
+    extra_data?: Record<string, unknown>;
+}
+
+export interface ConversationFilterParams {
+    search?: string; // Search in title
+    status?: string;
+    min_created_at?: string;
+    max_created_at?: string;
+    min_message_count?: number;
+    max_message_count?: number;
+}
+
+// Types for Users API (Admin level)
+export interface UserItem {
+    id: number;
+    email: string;
+    username: string;
+    full_name?: string;
+    is_active: boolean;
+    is_verified: boolean;
+    is_superuser: boolean;
+    oauth_provider?: string;
+    created_at: string;
+    updated_at: string;
+    last_login_at?: string;
+    // Profile fields
+    first_name?: string;
+    last_name?: string;
+    gender?: string;
+    height_cm?: string;
+    weight_kg?: string;
+    date_of_birth?: string;
+    location_city?: string;
+    location_country?: string;
+    dietary_restrictions?: string[];
+    allergies?: string[];
+    medical_conditions?: string[];
+    fitness_goals?: string[];
+    taste_preferences?: string[];
+    cuisine_interests?: string[];
+    cooking_skill_level?: string;
+}
+
+export interface UserListResponse {
+    users: UserItem[];
+    total_count: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+}
+
+export interface UserFilterParams {
+    search?: string; // Search in email, username, full_name
+    is_active?: boolean;
+    is_verified?: boolean;
+    is_superuser?: boolean;
+    oauth_provider?: string;
+    min_created_at?: string;
+    max_created_at?: string;
+    min_last_login?: string;
+    max_last_login?: string;
+    gender?: string;
+    location_city?: string;
+    location_country?: string;
+    dietary_restrictions?: string;
+    allergies?: string;
+    medical_conditions?: string;
+    fitness_goals?: string;
+    cooking_skill_level?: string;
+    min_height?: number;
+    max_height?: number;
+    min_weight?: number;
+    max_weight?: number;
+}
+
+// Messages API
+export const messagesApi = {
+    getAll: async (page = 1, page_size = 50): Promise<MessageListResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        return apiCall<MessageListResponse>(`/api/v1/chat/messages?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    filterAll: async (filters: MessageFilterParams, page = 1, page_size = 50): Promise<MessageListResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        // Add all filter parameters
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                params.append(key, value.toString());
+            }
+        });
+        
+        return apiCall<MessageListResponse>(`/api/v1/chat/messages/filter?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    getByConversation: async (conversationId: number, page = 1, page_size = 50): Promise<MessageListResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        return apiCall<MessageListResponse>(`/api/v1/chat/conversations/${conversationId}/messages?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    filter: async (conversationId: number, filters: MessageFilterParams, page = 1, page_size = 50): Promise<MessageListResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        // Add all filter parameters
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                params.append(key, value.toString());
+            }
+        });
+        
+        return apiCall<MessageListResponse>(`/api/v1/chat/conversations/${conversationId}/messages?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    create: async (conversationId: number, data: MessageCreateRequest): Promise<Message> => {
+        return apiCall<Message>(`/api/v1/chat/conversations/${conversationId}/messages`, {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
+    },
+
+    getById: async (messageId: number): Promise<Message> => {
+        return apiCall<Message>(`/api/v1/chat/messages/${messageId}`, {
+            method: "GET",
+        });
+    },
+
+    update: async (messageId: number, data: MessageUpdateRequest): Promise<Message> => {
+        return apiCall<Message>(`/api/v1/chat/messages/${messageId}`, {
+            method: "PUT",
+            body: JSON.stringify(data),
+        });
+    },
+
+    delete: async (messageId: number): Promise<void> => {
+        await apiCall<void>(`/api/v1/chat/messages/${messageId}`, {
+            method: "DELETE",
+        });
+    },
+};
+
+// Conversations API
+export const conversationsApi = {
+    getAll: async (page = 1, page_size = 20): Promise<ConversationListResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        return apiCall<ConversationListResponse>(`/api/v1/chat/conversations?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    filter: async (filters: ConversationFilterParams, page = 1, page_size = 20): Promise<ConversationListResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        // Add all filter parameters
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                params.append(key, value.toString());
+            }
+        });
+        
+        return apiCall<ConversationListResponse>(`/api/v1/chat/conversations?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    create: async (data: ConversationCreateRequest): Promise<Conversation> => {
+        return apiCall<Conversation>(`/api/v1/chat/conversations`, {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
+    },
+
+    getById: async (conversationId: number): Promise<Conversation> => {
+        return apiCall<Conversation>(`/api/v1/chat/conversations/${conversationId}`, {
+            method: "GET",
+        });
+    },
+
+    update: async (conversationId: number, data: ConversationUpdateRequest): Promise<Conversation> => {
+        return apiCall<Conversation>(`/api/v1/chat/conversations/${conversationId}`, {
+            method: "PUT",
+            body: JSON.stringify(data),
+        });
+    },
+
+    delete: async (conversationId: number): Promise<void> => {
+        await apiCall<void>(`/api/v1/chat/conversations/${conversationId}`, {
+            method: "DELETE",
+        });
+    },
+};
+
+// Users API (Admin level - using profile endpoints)
+export const usersApi = {
+    getAll: async (page = 1, page_size = 20): Promise<UserListResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        return apiCall<UserListResponse>(`/api/v1/profile/all?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    filter: async (filters: UserFilterParams, page = 1, page_size = 20): Promise<UserListResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        // Add all filter parameters
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                params.append(key, value.toString());
+            }
+        });
+        
+        return apiCall<UserListResponse>(`/api/v1/profile/filter?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    getById: async (userId: number): Promise<UserItem> => {
+        return apiCall<UserItem>(`/api/v1/profile/${userId}`, {
+            method: "GET",
+        });
+    },
+
+    update: async (userId: number, data: Partial<UpdateUserProfileRequest>): Promise<UserItem> => {
+        return apiCall<UserItem>(`/api/v1/profile/${userId}`, {
+            method: "PUT",
+            body: JSON.stringify(data),
+        });
+    },
+
+    delete: async (userId: number): Promise<void> => {
+        await apiCall<void>(`/api/v1/profile/${userId}`, {
+            method: "DELETE",
+        });
+    },
+};
+
 export default {
     authApi,
     intakesApi,
     profileApi,
     dishesApi,
+    messagesApi,
+    conversationsApi,
+    usersApi,
 };

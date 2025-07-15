@@ -22,6 +22,16 @@ const ProfileUpdate = lazy(() => import("./pages/ProfileUpdate"));
 const Demo = lazy(() => import("./pages/Demo"));
 const Dishes = lazy(() => import("./pages/Dishes"));
 const Intakes = lazy(() => import("./pages/Intakes"));
+const Messages = lazy(() => import("./pages/Messages"));
+const Conversations = lazy(() => import("./pages/Conversations"));
+const Users = lazy(() => import("./pages/Users"));
+
+// Detail pages for individual entities
+const DishDetail = lazy(() => import("./pages/DishDetail"));
+const IntakeDetail = lazy(() => import("./pages/IntakeDetail"));
+const MessageDetail = lazy(() => import("./pages/MessageDetail"));
+const ConversationDetail = lazy(() => import("./pages/ConversationDetail"));
+const UserDetail = lazy(() => import("./pages/UserDetail"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -151,6 +161,73 @@ const App = () => {
                         </ProtectedRoute>
                       } 
                     />
+                    <Route 
+                      path="/messages" 
+                      element={
+                        <ProtectedRoute>
+                          <Messages />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/conversations" 
+                      element={
+                        <ProtectedRoute>
+                          <Conversations />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/users" 
+                      element={
+                        <ProtectedRoute>
+                          <Users />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    
+                    {/* Individual entity detail routes */}
+                    <Route 
+                      path="/dishes/:id" 
+                      element={
+                        <ProtectedRoute>
+                          <DishDetail />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/intakes/:id" 
+                      element={
+                        <ProtectedRoute>
+                          <IntakeDetail />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/messages/:id" 
+                      element={
+                        <ProtectedRoute>
+                          <MessageDetail />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/conversations/:id" 
+                      element={
+                        <ProtectedRoute>
+                          <ConversationDetail />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/users/:id" 
+                      element={
+                        <ProtectedRoute>
+                          <UserDetail />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    
                     <Route 
                       path="/stats" 
                       element={

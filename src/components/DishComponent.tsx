@@ -144,7 +144,16 @@ const DishComponent: React.FC<DishComponentProps> = ({ dish, onDishUpdated, onDi
                             placeholder="Dish name"
                         />
                     ) : (
-                        dish.name
+                        <span 
+                            onClick={() => window.location.href = `/dishes/${dish.id}`}
+                            style={{ 
+                                cursor: 'pointer', 
+                                color: '#2563eb', 
+                                textDecoration: 'underline' 
+                            }}
+                        >
+                            {dish.name} (ID: {dish.id})
+                        </span>
                     )}
                 </CardTitle>
                 {!isEditing && (

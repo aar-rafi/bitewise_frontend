@@ -182,7 +182,16 @@ const IntakeComponent: React.FC<IntakeComponentProps> = ({
         <Card style={{ margin: '0.5rem 0' }}>
             <CardHeader>
                 <CardTitle style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>Intake - {formatDisplayDate(intake.intake_time)}</span>
+                    <span 
+                        onClick={() => window.location.href = `/intakes/${intake.id}`}
+                        style={{ 
+                            cursor: 'pointer', 
+                            color: '#2563eb', 
+                            textDecoration: 'underline' 
+                        }}
+                    >
+                        Intake (ID: {intake.id}) - {formatDisplayDate(intake.intake_time)}
+                    </span>
                     <HStack spacing={0.5}>
                         {isEditing ? (
                             <>

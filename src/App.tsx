@@ -25,6 +25,7 @@ const Intakes = lazy(() => import("./pages/Intakes"));
 const Messages = lazy(() => import("./pages/Messages"));
 const Conversations = lazy(() => import("./pages/Conversations"));
 const Users = lazy(() => import("./pages/Users"));
+const Tests = lazy(() => import("./pages/Tests"));
 
 // Detail pages for individual entities
 const DishDetail = lazy(() => import("./pages/DishDetail"));
@@ -182,6 +183,15 @@ const App = () => {
                       element={
                         <ProtectedRoute>
                           <Users />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    <Route 
+                      path="/tests" 
+                      element={
+                        <ProtectedRoute>
+                          <Tests />
                         </ProtectedRoute>
                       } 
                     />

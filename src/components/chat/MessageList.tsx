@@ -270,6 +270,26 @@ function MessageBubble({ message }: { message: Message }) {
     }
   };
 
+  const handleEditMessage = async () => {
+    if (typeof message.id === "string") {
+      toast({
+        title: "Cannot edit",
+        description: "This message is still being processed.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      window.location.href = `/messages/${message.id}`
+    } catch (error) {
+      toast({
+        title: "Redirect failed",
+        description: "Failed to delete the message",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeleteMessage = async () => {
     if (typeof message.id === "string") {
       toast({
@@ -448,6 +468,13 @@ function MessageBubble({ message }: { message: Message }) {
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={handleEditMessage}
+                        className="text"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Edit
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

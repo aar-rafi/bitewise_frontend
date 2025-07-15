@@ -1230,6 +1230,97 @@ export const usersApi = {
     },
 };
 
+
+
+// Test API types
+export interface TestItem {
+    id: number;
+    name: string;
+    created_at: string;
+    updated_at?: string;
+}
+
+export interface TestResponse {
+    id: number;
+    name: string;
+    created_at: string;
+    updated_at?: string;
+}
+
+export interface TestListResponse {
+    tests: TestItem[];
+    total_count: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+}
+
+export interface TestCreateRequest {
+    name: string;
+}
+
+export interface TestUpdateRequest {
+    name?: string;
+}
+
+export interface TestFilterParams {
+    search?: string;
+}
+
+// Tests API
+export const testsApi = {
+    getAll: async (page = 1, page_size = 20): Promise<TestListResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        return apiCall<TestListResponse>(`/api/v1/tests?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    filter: async (filters: TestFilterParams, page = 1, page_size = 20): Promise<TestListResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: page_size.toString()
+        });
+        
+        // Add filter parameters
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                params.append(key, value.toString());
+            }
+        });
+        
+        return apiCall<TestListResponse>(`/api/v1/tests?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
+    create: async (data: TestCreateRequest): Promise<TestResponse> => {
+        return apiCall<TestResponse>(`/api/v1/tests`, {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
+    },
+
+    update: async (testId: number, data: TestUpdateRequest): Promise<TestResponse> => {
+        return apiCall<TestResponse>(`/api/v1/tests/${testId}`, {
+            method: "PUT",
+            body: JSON.stringify(data),
+        });
+    },
+
+    delete: async (testId: number): Promise<void> => {
+        await apiCall<void>(`/api/v1/tests/${testId}`, {
+            method: "DELETE",
+        });
+    },
+};
+
+
+
 export default {
     authApi,
     intakesApi,
@@ -1238,4 +1329,5 @@ export default {
     messagesApi,
     conversationsApi,
     usersApi,
+    testsApi
 };

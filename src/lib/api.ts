@@ -643,6 +643,16 @@ export const intakesApi = {
         });
     },
 
+    getPrev: async (prev_day = 0): Promise<TodayIntakesResponse> => {
+        const params = new URLSearchParams({
+            prev_day: prev_day.toString()
+        });
+        
+        return apiCall<TodayIntakesResponse>(`/api/v1/intakes/prev?${params.toString()}`, {
+            method: "GET",
+        });
+    },
+
     create: async (data: CreateIntakeRequest): Promise<Intake> => {
         return apiCall<Intake>("/api/v1/intakes/", {
             method: "POST",

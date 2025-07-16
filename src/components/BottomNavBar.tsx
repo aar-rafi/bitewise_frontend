@@ -16,6 +16,7 @@ export default function BottomNavBar() {
     { path: "/stats", icon: LineChart, label: "Stats" },
     { path: "/chat", icon: MessageSquare, label: "Chat" },
     { path: "/profile", icon: User, label: "Profile" },
+    { path: "/demo", icon: Sparkles, label: "Online" },
   ];
 
   return (

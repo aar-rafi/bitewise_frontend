@@ -16,6 +16,8 @@ import { useToast } from '@/hooks/use-toast';
 import { profile } from 'console';
 import { toast } from 'sonner';
 
+import { intakesApi, TodayIntakesResponse, Intake, IntakeFilterParams, NutritionalSummary } from '@/lib/api';
+
 // Hardcoded dish data
 const dishes = [
   {
@@ -46,6 +48,10 @@ const Demo: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResult, setSearchResult] = useState("");
 
+  const [intakes, setIntakes] = useState<Intake[]>([]);
+
+  const [summaries, setSummaries] = useState<NutritionalSummary[]>([]);
+
   const handleSearch = () => {
     const found = searchableItems.find(item => 
       item.toLowerCase().includes(searchTerm.toLowerCase())
@@ -67,22 +73,135 @@ const Demo: React.FC = () => {
     }
   }
 
-  useEffect(() => {
-    const fetchCount = async () => {
-      try{
-        const count = await profileApi.getMessageCount();
-        console.log(count);
-        toast.success(`Loaded ${count} messages`)
-      } catch(err){
-        console.log(err);
-      }
-    }
+  // useEffect(() => {
+  //   const fetchCount = async () => {
+  //     try{
+  //       const count = await profileApi.getMessageCount();
+  //       console.log(count);
+  //       toast.success(`Loaded ${count} messages`)
+  //     } catch(err){
+  //       console.log(err);
+  //     }
+  //   }
 
-    fetchCount();
-  },[])
+  //   const fetchPrev = async () => {
+  //     try{
+  //       const count = await profileApi.getMessageCount();
+  //       console.log(count);
+  //       toast.success(`Loaded ${count} messages`)
+  //     } catch(err){
+  //       console.log(err);
+  //     }
+  //   }
+
+  //   fetchCount();
+  // },[])
+
+
+
+  useEffect(() => {
+      loadIntakes();
+      // console.log(summaries.length);
+
+      // for(let i=0; i<summaries.length; i++){
+      //   console.log(summaries[i]);
+      // }
+  }, []);
+
+  const loadIntakes = async (range_day = 4, useFilters = false) => {
+      try {
+          let response: TodayIntakesResponse;
+          
+          // const response: TodayIntakesResponse = await intakesApi.getPrev();
+          // console.log(response.nutritional_summary)
+
+          let sum: NutritionalSummary[];
+
+          sum = [];
+
+          for(let i=0; i<=range_day; i++){
+            response = await intakesApi.getPrev(i);
+            // console.log(response.nutritional_summary);
+            // setSummaries([...summaries, response.nutritional_summary]);
+            sum = [...sum, response.nutritional_summary];
+          }
+
+          setSummaries(sum);
+
+          // console.log(summaries.length);
+
+          // for(let i=0; i<summaries.length; i++){
+          //   console.log(summaries[i]);
+          // }
+          
+          // if (useFilters || hasActiveFilters()) {
+          //     response = await intakesApi.filter(filters, page, 20);
+          // } else {
+          //     response = await intakesApi.getAll(page, 20);
+          // }
+          
+          // if (page === 1) {
+          //     setIntakes(response.intakes);
+          // } else {
+          //     setIntakes(prev => [...prev, ...response.intakes]);
+          // }
+          
+          // setTotalCount(response.total_count);
+          // setCurrentPage(response.page);
+          // setTotalPages(response.total_pages);
+      } catch (error) {
+          console.error('Error loading intakes:', error);
+          toast.error('Failed to load intakes');
+      } finally {
+          // setIsLoading(false);
+          // console.log(summaries.length);
+
+          // for(let i=0; i<summaries.length; i++){
+          //   console.log(summaries[i]);
+          // }
+      }
+  };
+
+
+
 
   return (
     <Box p={2} maxWidth="1200px" mx="auto">
+
+      {/* <Center mb={2}>
+        <VStack spacing={0.5}>
+          <h1 style={{ fontSize: '2rem', color: '#22c55e', marginBottom: '0.5rem' }}>
+            {summaries[0].total_calories}
+          </h1>
+          <p style={{ color: '#666' }}>Frontend component templates for experimentation</p>
+        </VStack>
+      </Center> */}
+
+      <Grid>
+          {summaries.map((summary, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <CardTitle>{i} days ago</CardTitle>
+                {/* <CardDescription>{dish.description}</CardDescription> */}
+              </CardHeader>
+              <CardContent>
+                <Flex justify="space-between" align="center">
+                  <VStack>
+                    <span>Calories: {summary.total_calories}</span>
+                    <span>Protein: {summary.total_protein_g}</span>
+                    <span>Carbs: {summary.total_carbs_g}</span>
+                    <span>Fats: {summary.total_fats_g}</span>
+                  </VStack>
+                </Flex>
+              </CardContent>
+            </Card>
+          ))}
+        </Grid>
+
+
+      <Box mb="1000px"></Box>
+      <Spacer></Spacer>
+
       
       {/* Header */}
       <Center mb={2}>

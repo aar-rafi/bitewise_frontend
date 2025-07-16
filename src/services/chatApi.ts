@@ -326,3 +326,45 @@ export const chatApi = {
         });
     }
 }; 
+
+// Date range chat API functions
+export const getChatsByDateRange = async (
+  startDate: string,
+  endDate: string,
+  page: number = 1,
+  pageSize: number = 50
+) => {
+  const params = new URLSearchParams({
+    start_date: startDate,
+    end_date: endDate,
+    page: page.toString(),
+    page_size: pageSize.toString(),
+  });
+
+  return chatApiCall<GetConversationsResponse>(`/api/v1/chat/conversations/by-date-range?${params}`, {
+    method: 'GET',
+  });
+};
+
+export const getMessagesByDateRange = async (
+  startDate: string,
+  endDate: string,
+  conversationId?: number,
+  page: number = 1,
+  pageSize: number = 50
+) => {
+  const params = new URLSearchParams({
+    start_date: startDate,
+    end_date: endDate,
+    page: page.toString(),
+    page_size: pageSize.toString(),
+  });
+
+  if (conversationId) {
+    params.append('conversation_id', conversationId.toString());
+  }
+
+  return chatApiCall<MessagesResponse>(`/api/v1/chat/messages/by-date-range?${params}`, {
+    method: 'GET',
+  });
+}; 

@@ -16,6 +16,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Chat = lazy(() => import("./pages/Chat"));
+const ChatHistory = lazy(() => import("./pages/ChatHistory"));
 const Stats = lazy(() => import("./pages/Stats"));
 const Profile = lazy(() => import("./pages/Profile"));
 const ProfileUpdate = lazy(() => import("./pages/ProfileUpdate"));
@@ -123,6 +124,14 @@ const App = () => {
                       element={
                         <ProtectedRoute>
                           <Chat />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/chat-history" 
+                      element={
+                        <ProtectedRoute>
+                          <ChatHistory />
                         </ProtectedRoute>
                       } 
                     />

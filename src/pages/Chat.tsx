@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { ChatInterface } from "@/components/chat";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState, useRef } from "react";
+import { Input } from "@/components/ui/input";
 
 // Loading component for chat interface
 const ChatLoader = () => (
@@ -45,8 +47,20 @@ const ChatLoader = () => (
 );
 
 const Chat = () => {
+  // const [keyword, setKeyword] = useState("");
+  
   return (
     <div className="h-screen w-full">
+      {/* <Input
+          id="keyword"
+          value={keyword}
+          onChange={(e)=> {
+                  setKeyword(e.target.value);
+              }
+          }
+          placeholder="Search for a dish"
+          required
+      /> */}
       <Suspense fallback={<ChatLoader />}>
         <ChatInterface />
       </Suspense>

@@ -202,8 +202,8 @@ export const chatApi = {
         });
     },
 
-    async getConversations(): Promise<GetConversationsResponse> {
-        return chatApiCall<GetConversationsResponse>(CHAT_API_ENDPOINTS.CONVERSATIONS);
+    async getConversations(keyword: string): Promise<GetConversationsResponse> {
+        return chatApiCall<GetConversationsResponse>(CHAT_API_ENDPOINTS.CONVERSATIONS +"?keyword="+ encodeURIComponent(keyword));
     },
 
     async getConversation(conversationId: number): Promise<Conversation> {

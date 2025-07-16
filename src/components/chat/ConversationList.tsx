@@ -50,8 +50,8 @@ export function ConversationList({
     useState<Conversation | null>(null);
   const [newConversationTitle, setNewConversationTitle] = useState("");
   const [editTitle, setEditTitle] = useState("");
-
-  const { data: conversationsResponse, isLoading, error } = useConversations();
+  const [keyword, setKeyword] = useState("");
+  const { data: conversationsResponse, isLoading, error } = useConversations(keyword);
   const conversations = conversationsResponse?.conversations || [];
   const createConversation = useCreateConversation();
   const updateConversation = useUpdateConversation();
@@ -141,6 +141,16 @@ export function ConversationList({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Conversations</h2>
+        <Input
+          id="keyword"
+          value={keyword}
+          onChange={(e)=> {
+                  setKeyword(e.target.value);
+              }
+          }
+          placeholder="Search for a dish"
+          required
+      />
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">

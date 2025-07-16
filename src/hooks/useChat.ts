@@ -34,10 +34,11 @@ const thinkingStages = [
 ];
 
 // Conversation hooks
-export function useConversations() {
+export function useConversations(keyword : string) {
     return useQuery({
         queryKey: chatKeys.conversations(),
-        queryFn: chatApi.getConversations,
+        queryFn: ()=> chatApi.getConversations(keyword),
+        enabled: keyword.length >= 5,
     });
 }
 

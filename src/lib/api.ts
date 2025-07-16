@@ -547,8 +547,28 @@ export const profileApi = {
     },
 };
 
+export interface DishesSearchResponse {
+    dishes: Dish[];
+    page: number;
+    page_size: number;
+    total_count: number;
+    total_pages: number;
+  }
+
+export const dishesApi = {
+    search: async (query : string) => {
+        return apiCall<DishesSearchResponse>(
+            "/api/v1/dishes/search?q=" + encodeURIComponent(query),
+            {
+                method: "GET"
+            }
+        )
+    }
+};
+
 export default {
     authApi,
     intakesApi,
     profileApi,
+    dishesApi
 };

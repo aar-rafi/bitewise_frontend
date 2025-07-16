@@ -7,6 +7,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import LogIntakeDialog from "@/components/LogIntakeDialog";
 import AnimatedNumber from "@/components/AnimatedNumber";
 import AppHeader from "@/components/AppHeader";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import {
   ChartContainer,
   ChartTooltip,
@@ -32,6 +34,7 @@ export default function Dashboard() {
   const { data, isLoading, error } = useIntakesToday();
   const [files, setFiles] = useState<File[]>([]);
   const [showTokenProcessing, setShowTokenProcessing] = useState(false);
+  const navigate = useNavigate();
   
   // Handle OAuth tokens if present in URL
   const { isProcessingTokens } = useTokenHandler({
@@ -158,7 +161,12 @@ export default function Dashboard() {
       >
         {/* <LogIntakeDialog /> */}
       </AppHeader>
-
+      <div className = "flex flex-row gap-4">
+        <Button className = "px-4 py-2 text-lg font-bold shadow-md bg-gradient-to-r from-nutrition-green to-nutrition-emerald text-white hover:scale-105 transition-transform"
+        onClick={()=>navigate("/intake/add")}>
+          Add Intake
+        </Button>
+      </div>
       {/* Main Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
         {/* Calories Card with Glass Effect */}

@@ -575,6 +575,11 @@ export interface DishFilterParams {
     max_sugar?: number;
 }
 
+export interface IntakePrevParams {
+    from_prev?: number;
+    to_prev?: number;
+}
+
 export interface IntakeFilterParams {
     // Intake-specific filters
     min_intake_time?: string; // ISO format datetime string

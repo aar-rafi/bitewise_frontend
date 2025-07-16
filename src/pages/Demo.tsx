@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { profile } from 'console';
 import { toast } from 'sonner';
 
-import { intakesApi, TodayIntakesResponse, Intake, IntakeFilterParams, NutritionalSummary } from '@/lib/api';
+import { IntakePrevParams, intakesApi, TodayIntakesResponse, Intake, IntakeFilterParams, NutritionalSummary } from '@/lib/api';
 
 // Hardcoded dish data
 const dishes = [
@@ -97,6 +97,23 @@ const Demo: React.FC = () => {
   //   fetchCount();
   // },[])
 
+  // Filter state
+  const [filters, setFilters] = useState<IntakePrevParams>({
+      from_prev: 0,
+      to_prev: 3
+  });
+
+  const handleFilterChange = (field: keyof IntakePrevParams, value: string | number | boolean | undefined) => {
+      setFilters(prev => ({
+          ...prev,
+          [field]: value
+      }));
+  };
+
+  const handleApplyFilters = () => {
+        loadIntakes();
+    };
+
 
 
   useEffect(() => {
@@ -119,7 +136,9 @@ const Demo: React.FC = () => {
 
           sum = [];
 
-          for(let i=0; i<=range_day; i++){
+          range_day=filters.to_prev;
+
+          for(let i=filters.from_prev; i<=filters.to_prev; i++){
             response = await intakesApi.getPrev(i);
             // console.log(response.nutritional_summary);
             // setSummaries([...summaries, response.nutritional_summary]);
@@ -163,8 +182,6 @@ const Demo: React.FC = () => {
   };
 
 
-
-
   return (
     <Box p={2} maxWidth="1200px" mx="auto">
 
@@ -177,11 +194,48 @@ const Demo: React.FC = () => {
         </VStack>
       </Center> */}
 
+
+      <Box style={{ flex: 1 }}>
+        <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Filter:</p>
+        <HStack spacing={0.5}>
+            <Input
+                type="number"
+                step="1"
+                placeholder="From prev"
+                value={filters.from_prev?.toString() || ''}
+                onChange={(e) => handleFilterChange('from_prev', e.target.value ? parseInt(e.target.value) : undefined)}
+            />
+           <Input
+                type="number"
+                step="1"
+                placeholder="To prev"
+                value={filters.to_prev?.toString() || ''}
+                onChange={(e) => handleFilterChange('to_prev', e.target.value ? parseInt(e.target.value) : undefined)}
+            />
+            <Button onClick={() => handleApplyFilters()}>Submit</Button>
+        </HStack>
+    </Box>
+
+
+    <Box mb="50px"></Box>
+
+
+    <Center mb={2}>
+      <VStack spacing={0.5}>
+        <h1 style={{ fontSize: '2rem', color: '#22c55e', marginBottom: '0.5rem' }}>
+          {/* {filters.to_prev} */}
+          Nutritional Summaries
+        </h1>
+        {/* <p style={{ color: '#666' }}>Frontend component templates for experimentation</p> */}
+      </VStack>
+    </Center>
+
+
       <Grid>
           {summaries.map((summary, i) => (
             <Card key={i}>
               <CardHeader>
-                <CardTitle>{i} days ago</CardTitle>
+                <CardTitle>{filters.from_prev + i} days ago</CardTitle>
                 {/* <CardDescription>{dish.description}</CardDescription> */}
               </CardHeader>
               <CardContent>

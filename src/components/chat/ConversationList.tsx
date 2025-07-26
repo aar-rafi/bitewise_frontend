@@ -8,6 +8,8 @@ import {
   Trash2,
   Archive,
   ArchiveRestore,
+  Menu,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +28,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -39,11 +48,17 @@ import { Conversation } from "@/types/chat";
 interface ConversationListProps {
   selectedConversationId?: number;
   onSelectConversation: (conversationId: number) => void;
+  isMobileSheetOpen?: boolean;
+  onMobileSheetOpenChange?: (open: boolean) => void;
+  showMobileSheet?: boolean;
 }
 
 export function ConversationList({
   selectedConversationId,
   onSelectConversation,
+  isMobileSheetOpen = false,
+  onMobileSheetOpenChange = () => {},
+  showMobileSheet = false,
 }: ConversationListProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingConversation, setEditingConversation] =
@@ -57,6 +72,14 @@ export function ConversationList({
   const updateConversation = useUpdateConversation();
   const deleteConversation = useDeleteConversation();
 
+  const handleSelectConversation = (conversationId: number) => {
+    onSelectConversation(conversationId);
+    // Close mobile sheet when conversation is selected
+    if (showMobileSheet) {
+      onMobileSheetOpenChange(false);
+    }
+  };
+
   const handleCreateConversation = async () => {
     if (!newConversationTitle.trim()) return;
 
@@ -66,7 +89,7 @@ export function ConversationList({
       });
       setNewConversationTitle("");
       setIsCreateDialogOpen(false);
-      onSelectConversation(newConversation.id);
+      handleSelectConversation(newConversation.id);
     } catch (error) {
       console.error("Failed to create conversation:", error);
     }
@@ -94,7 +117,7 @@ export function ConversationList({
         // Select first available conversation or none
         const remaining = conversations.filter((c) => c.id !== conversationId);
         if (remaining && remaining.length > 0) {
-          onSelectConversation(remaining[0].id);
+          handleSelectConversation(remaining[0].id);
         }
       }
     } catch (error) {
@@ -115,30 +138,8 @@ export function ConversationList({
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">Conversations</h2>
-          <Skeleton className="h-8 w-8" />
-        </div>
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full" />
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center text-red-600">
-        Failed to load conversations
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-2">
+  const ConversationListContent = () => (
+    <>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-base font-semibold">Conversations</h2>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -196,7 +197,7 @@ export function ConversationList({
                 ? "bg-muted border-primary"
                 : ""
             }`}
-            onClick={() => onSelectConversation(conversation.id)}
+            onClick={() => handleSelectConversation(conversation.id)}
           >
             <CardContent className="p-3">
               <div className="flex items-center justify-between">
@@ -277,8 +278,52 @@ export function ConversationList({
           </div>
         )}
       </div>
+    </>
+  );
 
-      {/* Edit Dialog */}
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold">Conversations</h2>
+          <Skeleton className="h-8 w-8" />
+        </div>
+        {[...Array(5)].map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-600">
+        Failed to load conversations
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Desktop view - hidden on mobile */}
+      {!showMobileSheet && (
+        <div className="space-y-2 hidden md:block">
+          <ConversationListContent />
+        </div>
+      )}
+
+      {/* Mobile view - Sheet overlay */}
+      {showMobileSheet && (
+        <Sheet open={isMobileSheetOpen} onOpenChange={onMobileSheetOpenChange}>
+          <SheetContent side="left" className="w-80 p-0">
+            <div className="p-4 space-y-2">
+              <ConversationListContent />
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
+
+      {/* Edit Dialog - shared between both views */}
       <Dialog
         open={!!editingConversation}
         onOpenChange={() => setEditingConversation(null)}
@@ -319,6 +364,25 @@ export function ConversationList({
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
+  );
+}
+
+// Hamburger menu trigger for mobile
+export function ConversationListMobileTrigger({
+  onOpenSheet,
+}: {
+  onOpenSheet: () => void;
+}) {
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="md:hidden h-10 w-10 p-0"
+      onClick={onOpenSheet}
+    >
+      <Menu className="h-5 w-5" />
+      <span className="sr-only">Open conversations</span>
+    </Button>
   );
 }

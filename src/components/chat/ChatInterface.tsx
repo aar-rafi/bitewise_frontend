@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ConversationList } from "./ConversationList";
+import { ConversationList, ConversationListMobileTrigger } from "./ConversationList";
 import { MessageList } from "./MessageList";
 import { MessageInputWithImages } from "./MessageInputWithImages";
 import {
@@ -28,6 +28,7 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
     number | undefined
   >();
   const [showSummary, setShowSummary] = useState(false);
+  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
 
   const { data: conversation } = useConversation(selectedConversationId!);
   const { data: summary } = useConversationSummary(
@@ -57,17 +58,27 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
 
   return (
     <div className={`flex h-full bg-background ${className}`}>
-      {/* Sidebar - Conversation List */}
-      <div className="w-72 border-r bg-muted/20 flex flex-col">
+      {/* Sidebar - Conversation List (Desktop only) */}
+      <div className="hidden md:flex w-72 border-r bg-muted/20 flex-col">
         <div className="flex-1 overflow-y-auto">
           <div className="h-full p-4">
             <ConversationList
               selectedConversationId={selectedConversationId}
               onSelectConversation={handleConversationSelect}
+              showMobileSheet={false}
             />
           </div>
         </div>
       </div>
+
+      {/* Mobile Sheet for Conversation List */}
+      <ConversationList
+        selectedConversationId={selectedConversationId}
+        onSelectConversation={handleConversationSelect}
+        showMobileSheet={true}
+        isMobileSheetOpen={isMobileSheetOpen}
+        onMobileSheetOpenChange={setIsMobileSheetOpen}
+      />
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
@@ -77,6 +88,10 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
             <div className="border-b p-4 bg-background">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
+                  {/* Hamburger menu for mobile */}
+                  <ConversationListMobileTrigger
+                    onOpenSheet={() => setIsMobileSheetOpen(true)}
+                  />
                   <div>
                     <h2 className="font-semibold text-lg truncate max-w-[300px]">
                       {conversation.title}
@@ -174,8 +189,21 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
             </div>
           </>
         ) : (
-          /* Welcome Screen */
-          <div className="flex-1 flex items-center justify-center p-6">
+          <>
+            {/* Header for welcome screen with hamburger menu */}
+            <div className="border-b p-4 bg-background md:hidden">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <ConversationListMobileTrigger
+                    onOpenSheet={() => setIsMobileSheetOpen(true)}
+                  />
+                  <h2 className="font-semibold text-lg">Chat</h2>
+                </div>
+              </div>
+            </div>
+
+            {/* Welcome Screen */}
+            <div className="flex-1 flex items-center justify-center p-6">
             <div className="text-center max-w-md">
               <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageCircle className="h-8 w-8 text-primary-foreground" />
@@ -202,6 +230,7 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
               />
             </div>
           </div>
+          </>
         )}
       </div>
     </div>

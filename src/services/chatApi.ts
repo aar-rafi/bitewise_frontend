@@ -327,7 +327,7 @@ export const chatApi = {
     }
 }; 
 
-// Date range chat API functions
+// ddate range chat API functions
 export const getChatsByDateRange = async (
   startDate: string,
   endDate: string,

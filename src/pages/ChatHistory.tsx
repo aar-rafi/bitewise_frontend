@@ -63,23 +63,22 @@ export default function ChatHistory() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showMessagesDialog, setShowMessagesDialog] = useState(false);
 
-  // Set default dates (last 30 days)
   useEffect(() => {
     const today = new Date();
-    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const tenDaysAgo = new Date(today.getTime() - 10 * 24 * 60 * 60 * 1000);
     
     setEndDate(format(today, "yyyy-MM-dd"));
-    setStartDate(format(thirtyDaysAgo, "yyyy-MM-dd"));
+    setStartDate(format(tenDaysAgo, "yyyy-MM-dd"));
   }, []);
 
   const handleSearch = async () => {
     if (!startDate || !endDate) {
-      setError("Please select both start and end dates");
+      setError("select both start and end dates");
       return;
     }
 
     if (new Date(startDate) > new Date(endDate)) {
-      setError("Start date must be before end date");
+      setError("start date must be before end date");
       return;
     }
 
@@ -95,7 +94,7 @@ export default function ChatHistory() {
       setTotalConversations(response.total_count);
       setCurrentPage(response.page);
     } catch (err: any) {
-      setError(err.message || "Failed to fetch chat history");
+      setError(err.message || "---failed to fetch chat history---");
     } finally {
       setLoading(false);
     }
@@ -115,44 +114,45 @@ export default function ChatHistory() {
         1,
         100
       );
-      setMessages(response.messages as Message[]);
+      const sm = response.messages;
+      const smsort:Message[] = sm.sort((a,b)=> new Date(a.created_at).getTime() -new Date(b.created_at).getTime());
+      setMessages(smsort as Message[]);
       setTotalMessages(response.total_count);
     } catch (err: any) {
-      setError(err.message || "Failed to fetch messages");
+      setError(err.message || "--failed to fetch messages--");
     } finally {
       setMessagesLoading(false);
     }
   };
 
-  const handleViewAllMessages = async () => {
-    if (!startDate || !endDate) return;
+  // const handleViewAllMessages = async () => {
+  //   if (!startDate || !endDate) return;
 
-    setMessagesLoading(true);
-    setShowMessagesDialog(true);
-    setSelectedConversation(null);
+  //   setMessagesLoading(true);
+  //   setShowMessagesDialog(true);
+  //   setSelectedConversation(null);
 
-    try {
-      const response = await getMessagesByDateRange(
-        startDate,
-        endDate,
-        undefined,
-        1,
-        100
-      );
-      setMessages(response.messages as Message[]);
-      setTotalMessages(response.total_count);
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch messages");
-    } finally {
-      setMessagesLoading(false);
-    }
-  };
+  //   try {
+  //     const response = await getMessagesByDateRange(
+  //       startDate,
+  //       endDate,
+  //       undefined,
+  //       1,
+  //       100
+  //     );
+  //     setMessages(response.messages as Message[]);
+  //     setTotalMessages(response.total_count);
+  //   } catch (err: any) {
+  //     setError(err.message || "--failed to fetch messages-");
+  //   } finally {
+  //     setMessagesLoading(false);
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <Card className="backdrop-blur-lg bg-white/70 border border-white/20 shadow-lg">
+        {/* <Card className="backdrop-blur-lg bg-white/70 border border-white/20 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl font-bold text-green-800">
               <MessageCircle className="h-7 w-7" />
@@ -162,9 +162,8 @@ export default function ChatHistory() {
               View your conversations and messages within a specific date range
             </p>
           </CardHeader>
-        </Card>
+        </Card> */}
 
-        {/* Date Range Selection */}
         <Card className="backdrop-blur-lg bg-white/70 border border-white/20 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg text-green-700">
@@ -206,7 +205,7 @@ export default function ChatHistory() {
                 {loading ? "Searching..." : "Search Conversations"}
               </Button>
               
-              {conversations.length > 0 && (
+              {/* {conversations.length > 0 && (
                 <Button 
                   onClick={handleViewAllMessages}
                   variant="outline"
@@ -215,7 +214,7 @@ export default function ChatHistory() {
                   <Filter className="h-4 w-4 mr-2" />
                   View All Messages
                 </Button>
-              )}
+              )} */}
             </div>
 
             {error && (
@@ -226,7 +225,6 @@ export default function ChatHistory() {
           </CardContent>
         </Card>
 
-        {/* Results Summary */}
         {(conversations.length > 0 || loading) && (
           <Card className="backdrop-blur-lg bg-white/70 border border-white/20 shadow-lg">
             <CardContent className="pt-6">
@@ -249,7 +247,6 @@ export default function ChatHistory() {
           </Card>
         )}
 
-        {/* Conversations List */}
         {loading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
@@ -303,14 +300,13 @@ export default function ChatHistory() {
             <CardContent className="pt-6 text-center">
               <MessageCircle className="h-12 w-12 text-green-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-green-800 mb-2">No conversations found</h3>
-              <p className="text-green-600">
+              {/* <p className="text-green-600">
                 No conversations were found in the selected date range. Try adjusting your search criteria.
-              </p>
+              </p> */}
             </CardContent>
           </Card>
         ) : null}
 
-        {/* Messages Dialog */}
         <Dialog open={showMessagesDialog} onOpenChange={setShowMessagesDialog}>
           <DialogContent className="max-w-4xl max-h-[80vh] backdrop-blur-lg bg-white/90">
             <DialogHeader>
@@ -337,7 +333,7 @@ export default function ChatHistory() {
                 </div>
               ) : messages.length > 0 ? (
                 <div className="space-y-4">
-                  {messages.map((message) => (
+                  {messages.sort().map((message) => (
                     <div 
                       key={message.id}
                       className={`p-4 rounded-lg ${
@@ -368,13 +364,13 @@ export default function ChatHistory() {
                     </div>
                   ))}
                   
-                  {messages.length === 100 && (
+                  {/* {messages.length === 100 && (
                     <div className="text-center py-4">
                       <Badge variant="outline" className="text-green-700">
                         Showing first 100 messages
                       </Badge>
                     </div>
-                  )}
+                  )} */}
                 </div>
               ) : (
                 <div className="text-center py-8">

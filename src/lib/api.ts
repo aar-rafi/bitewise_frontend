@@ -423,6 +423,11 @@ export interface CreateIntakeRequest {
     water_ml: number;
 }
 
+export interface CreateWaterIntakeRequest {
+    water_ml: number;
+    intake_time: string;
+}
+
 export interface TodayIntakesResponse {
     intakes: Intake[];
     total_count: number;
@@ -436,20 +441,19 @@ export const intakesApi = {
     getToday: async (): Promise<TodayIntakesResponse> => {
         return apiCall<TodayIntakesResponse>("/api/v1/intakes/today", {
             method: "GET",
-            // Authorization header is now automatically added by apiCall
-            // headers: {
-            //     Authorization: `Bearer ${tokenStorage.getAccessToken()}`,
-            // },
         });
     },
 
     create: async (data: CreateIntakeRequest): Promise<Intake> => {
         return apiCall<Intake>("/api/v1/intakes/", {
             method: "POST",
-            // Authorization header is now automatically added by apiCall
-            // headers: {
-            //     Authorization: `Bearer ${tokenStorage.getAccessToken()}`,
-            // },
+            body: JSON.stringify(data),
+        });
+    },
+
+    createWaterIntake: async (data: CreateWaterIntakeRequest): Promise<Intake> => {
+        return apiCall<Intake>("/api/v1/intakes/water", {
+            method: "POST",
             body: JSON.stringify(data),
         });
     },

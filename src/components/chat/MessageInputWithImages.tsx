@@ -210,7 +210,7 @@ export function MessageInputWithImages({
                 <ImageIcon className="h-4 w-4" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-96 p-4" align="start">
+            <PopoverContent className="w-[600px] p-6" align="start">
               <ImageUpload
                 onImagesSelected={handleImagesSelected}
                 disabled={disabled || isSending}

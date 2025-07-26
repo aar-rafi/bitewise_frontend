@@ -140,23 +140,23 @@ export function ImageUpload({
       <Card
         {...getRootProps()}
         className={`
-          border-2 border-dashed p-6 cursor-pointer transition-colors
-          ${isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'}
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary hover:bg-primary/5'}
+          border-2 border-dashed p-16 cursor-pointer transition-colors min-h-[320px] flex items-center justify-center bg-green-50/60 backdrop-blur-sm
+          ${isDragActive ? 'border-green-500 bg-green-100/70' : 'border-green-200/50'}
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-green-400 hover:bg-green-100/70'}
           ${selectedImages.length >= maxImages ? 'opacity-50 cursor-not-allowed' : ''}
         `}
       >
         <input {...getInputProps()} />
         <div className="text-center">
-          <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground mb-1">
+          <Upload className="h-16 w-16 mx-auto mb-6 text-green-600" />
+          <p className="text-lg text-green-700 mb-3 font-medium">
             {isDragActive
               ? 'Drop images here...'
               : selectedImages.length >= maxImages
               ? `Maximum ${maxImages} images reached`
               : 'Drag & drop images here, or click to select'}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-base text-green-600">
             JPEG, PNG, WebP, GIF • Max {formatFileSize(maxSizePerImage)} per image
           </p>
         </div>

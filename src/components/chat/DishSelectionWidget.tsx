@@ -40,13 +40,13 @@ function DishCardComponent({
     return (
         <div
             className={`
-                flex-shrink-0 w-72 bg-white rounded-xl border-2 transition-all duration-300 cursor-pointer
-                hover:shadow-lg hover:-translate-y-1 relative overflow-hidden
+                flex-shrink-0 w-72 bg-green-50/60 backdrop-blur-sm rounded-xl border-2 transition-all duration-300 cursor-pointer
+                hover:shadow-lg hover:-translate-y-1 relative overflow-hidden hover:bg-green-50/80
                 ${isSelected
                     ? wasSelectedInResolved
-                        ? "border-green-500 shadow-green-100 shadow-lg" // Resolved selection
-                        : "border-blue-500 shadow-blue-100 shadow-lg" // Active selection
-                    : "border-gray-200 hover:border-gray-300"
+                        ? "border-green-500 shadow-green-100 shadow-lg bg-green-100/70" // Resolved selection
+                        : "border-blue-500 shadow-blue-100 shadow-lg bg-blue-50/60" // Active selection
+                    : "border-green-200/50 hover:border-green-300/70"
                 }
                 ${isResolved && !wasSelectedInResolved ? "opacity-60" : ""}
                 ${disabled ? "cursor-not-allowed" : ""}
@@ -115,7 +115,7 @@ function DishCardComponent({
                 {/* Cuisine Badge */}
                 {dish.cuisine && (
                     <div className="mb-4">
-                        <Badge variant="outline" className="text-xs font-medium border-blue-200 text-blue-700 bg-blue-50">
+                        <Badge variant="outline" className="text-xs font-medium border-green-200 text-green-700 bg-green-50">
                             {dish.cuisine}
                         </Badge>
                     </div>
@@ -148,7 +148,7 @@ function DishCardComponent({
                                     onConfirm();
                                 }}
                                 disabled={isConfirming}
-                                className="w-full h-10 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                                className="w-full h-10 bg-green-600 hover:bg-green-700 text-white font-medium"
                             >
                                 {isConfirming ? (
                                     <>
@@ -180,7 +180,7 @@ function DishCardComponent({
                     <div className="border-t pt-4">
                         <Button 
                             variant="outline" 
-                            className="w-full h-10 border-gray-300 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                            className="w-full h-10 border-gray-300 hover:border-green-500 hover:text-green-600 transition-colors"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onSelect();
@@ -198,6 +198,9 @@ function DishCardComponent({
 export function DishSelectionWidget({ widget }: DishSelectionWidgetProps) {
     const [selectedDishId, setSelectedDishId] = useState<number | null>(null);
     const [portionSizes, setPortionSizes] = useState<Record<number, number>>({});
+    const [scrollPosition, setScrollPosition] = useState(0);
+    const [containerWidth, setContainerWidth] = useState(0);
+    const [scrollWidth, setScrollWidth] = useState(0);
     const { mutate: confirmSelection, isPending: isConfirming } = useConfirmDishSelection();
     const { toast } = useToast();
 
@@ -257,6 +260,18 @@ export function DishSelectionWidget({ widget }: DishSelectionWidgetProps) {
         });
     };
 
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const element = e.currentTarget;
+        setScrollPosition(element.scrollLeft);
+        setContainerWidth(element.clientWidth);
+        setScrollWidth(element.scrollWidth);
+    };
+
+    // Calculate dots for custom scrollbar
+    const totalDots = Math.max(3, Math.ceil(widget.dishes.length / 3.5)); // Minimum 3 dots
+    const scrollPercentage = scrollWidth > containerWidth ? scrollPosition / (scrollWidth - containerWidth) : 0;
+    const activeDot = Math.round(scrollPercentage * (totalDots - 1));
+
     const isResolved = widget.status === "resolved";
 
     return (
@@ -265,8 +280,8 @@ export function DishSelectionWidget({ widget }: DishSelectionWidgetProps) {
             <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                            <Utensils className="h-6 w-6 text-blue-600" />
+                        <div className="p-2 bg-green-100 rounded-lg">
+                            <Utensils className="h-6 w-6 text-green-600" />
                         </div>
                         <h3 className="text-xl font-bold text-gray-900">
                             {isResolved ? "Dish Selection - Completed" : "Choose Your Dish"}
@@ -288,11 +303,29 @@ export function DishSelectionWidget({ widget }: DishSelectionWidgetProps) {
                 </p>
             </div>
 
-            {/* Dish Cards - Full Width Scrollable */}
+            {/* Dish Cards - Horizontal Scroll Container */}
             {widget.dishes.length > 0 ? (
-                <div className="w-full">
-                    {/* Horizontal scroll container - full width */}
-                    <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <div className="w-full max-w-full overflow-hidden">
+                    {/* Horizontal scroll container with mouse wheel support */}
+                    <div 
+                        data-scroll-container
+                        className="flex gap-4 overflow-x-auto pb-2 pt-2 scroll-smooth [&::-webkit-scrollbar]:hidden"
+                        style={{
+                            // Calculate width to show exactly 3.5 cards
+                            // 288px (w-72) per card + 16px gap * 3.5 = ~1056px max width
+                            maxWidth: 'calc(3.5 * 288px + 3 * 16px)',
+                            scrollbarWidth: 'none', // Firefox
+                            msOverflowStyle: 'none', // IE/Edge
+                        }}
+                        onWheel={(e) => {
+                            // Enable horizontal scrolling with mouse wheel
+                            if (e.deltaY !== 0) {
+                                e.preventDefault();
+                                e.currentTarget.scrollLeft += e.deltaY;
+                            }
+                        }}
+                        onScroll={handleScroll}
+                    >
                         {widget.dishes.map((dish) => {
                             const isSelected = selectedDishId === dish.id;
                             const wasSelectedInResolved = isResolved && widget.selected_dish_id === dish.id;
@@ -319,8 +352,34 @@ export function DishSelectionWidget({ widget }: DishSelectionWidgetProps) {
                         })}
                     </div>
                     
-                    {/* Scroll hint for mobile */}
-                    {widget.dishes.length > 1 && (
+                    {/* Custom Dot Scrollbar */}
+                    {widget.dishes.length > 3 && (
+                        <div className="flex justify-center items-center mt-4 space-x-2">
+                            {Array.from({ length: totalDots }, (_, index) => (
+                                <button
+                                    key={index}
+                                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                        index === activeDot
+                                            ? "bg-green-600 scale-125"
+                                            : index < activeDot
+                                            ? "bg-green-400"
+                                            : "bg-gray-300"
+                                    }`}
+                                    onClick={() => {
+                                        const scrollContainer = document.querySelector('[data-scroll-container]') as HTMLDivElement;
+                                        if (scrollContainer) {
+                                            const targetScroll = (index / (totalDots - 1)) * (scrollContainer.scrollWidth - scrollContainer.clientWidth);
+                                            scrollContainer.scrollTo({ left: targetScroll, behavior: 'smooth' });
+                                        }
+                                    }}
+                                    aria-label={`Scroll to section ${index + 1}`}
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Scroll hint */}
+                    {widget.dishes.length > 3 && (
                         <div className="text-center mt-2">
                             <p className="text-xs text-gray-500">← Scroll horizontally to see more options →</p>
                         </div>

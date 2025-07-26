@@ -79,49 +79,47 @@ function MessageImages({ message }: { message: Message }) {
   return (
     <>
       <div className="mt-3 space-y-2">
-        {/* Images grid */}
-        <div className={`grid gap-2 ${
+        {/* Images display - Match dish widget size */}
+        <div className={`flex gap-4 overflow-x-auto pb-2 ${
           images.length === 1 
-            ? 'grid-cols-1' 
-            : images.length === 2 
-            ? 'grid-cols-2' 
-            : 'grid-cols-2 md:grid-cols-3'
+            ? 'justify-start' 
+            : ''
         }`}>
           {images.map((image, index) => (
             <div
               key={index}
-              className="relative group rounded-lg overflow-hidden border cursor-pointer hover:shadow-md transition-shadow"
+              className="relative group flex-shrink-0 w-72 bg-green-50/60 backdrop-blur-sm rounded-xl border-2 border-green-200/50 overflow-hidden cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 hover:bg-green-50/80"
               onClick={() => setSelectedImageIndex(index)}
             >
-              <img
-                src={image.url}
-                alt={image.filename}
-                className="w-full h-32 object-cover"
-                loading="lazy"
-              />
-              
-              {/* Overlay with image info */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ZoomIn className="h-6 w-6 text-white" />
+              {/* Image Container - Match dish widget image area */}
+              <div className="relative h-40 overflow-hidden">
+                <img
+                  src={image.url}
+                  alt={image.filename}
+                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                  loading="lazy"
+                />
+                
+                {/* Overlay with zoom icon */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ZoomIn className="h-8 w-8 text-white" />
+                  </div>
                 </div>
+                
+                {/* Image number badge for multiple images */}
+                {images.length > 1 && (
+                  <Badge 
+                    variant="secondary" 
+                    className="absolute top-3 left-3 bg-black/70 text-white border-none backdrop-blur-sm"
+                  >
+                    {index + 1}
+                  </Badge>
+                )}
               </div>
-              
-              {/* Image number badge for multiple images */}
-              {images.length > 1 && (
-                <Badge 
-                  variant="secondary" 
-                  className="absolute top-1 left-1 h-5 w-5 p-0 rounded-full text-xs flex items-center justify-center"
-                >
-                  {index + 1}
-                </Badge>
-              )}
             </div>
           ))}
         </div>
-
-        {/* Image metadata */}
-        
       </div>
 
       {/* Image viewer dialog */}

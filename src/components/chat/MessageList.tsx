@@ -121,13 +121,7 @@ function MessageImages({ message }: { message: Message }) {
         </div>
 
         {/* Image metadata */}
-        <div className="flex flex-wrap gap-1">
-          {images.map((image, index) => (
-            <Badge key={index} variant="outline" className="text-xs">
-              {image.filename} ({formatFileSize(image.size)})
-            </Badge>
-          ))}
-        </div>
+        
       </div>
 
       {/* Image viewer dialog */}
@@ -343,9 +337,9 @@ function MessageBubble({ message }: { message: Message }) {
   // Base card classes
   let cardBaseClasses = "";
   if (isUser && !isThinking) {
-    cardBaseClasses = "bg-primary text-primary-foreground";
+    cardBaseClasses = "bg-blue-50 border border-blue-200 text-gray-900";
   } else {
-    cardBaseClasses = "bg-muted";
+    cardBaseClasses = "bg-white border border-gray-200 text-gray-900";
   }
 
   // Conditional classes for animations and styling
@@ -363,7 +357,7 @@ function MessageBubble({ message }: { message: Message }) {
       >
         <div
           className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-            isUser ? "bg-primary text-primary-foreground" : "bg-muted"
+            isUser ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600"
           }`}
         >
           {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
@@ -376,98 +370,25 @@ function MessageBubble({ message }: { message: Message }) {
             className={`${cardBaseClasses} ${thinkingAiMessageClasses} transition-all duration-300`}
           >
             <CardContent className="p-3">
-              <div className="flex items-start justify-between mb-1">
-                <div className="flex items-center space-x-2">
-                  <Badge
-                    variant={badgeVariant}
-                    className="text-xs min-w-[60px] flex justify-center items-center"
-                  >
-                    {message.status}
-                    {(isPending || isThinking) && (
-                      <Loader2 className="h-3 w-3 ml-1 animate-spin" />
-                    )}
-                  </Badge>
-                  {!(isThinking || (isUser && isPending)) && ( // Hide timestamp for thinking AI and pending User messages
-                    <span className="text-xs opacity-70">
-                      {formatDistanceToNow(new Date(message.created_at), {
-                        addSuffix: true,
-                      })}
-                    </span>
-                  )}
-                </div>
 
-                {!(isThinking || (isUser && isPending)) && ( // Hide menu for thinking AI and pending User messages
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0 opacity-70 hover:opacity-100"
-                        disabled={typeof message.id === "string"}
-                      >
-                        <MoreVertical className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        onClick={() => copyToClipboard(message.content)}
-                        disabled={message.message_type === "system_status"}
-                      >
-                        {copiedMessageId === message.id.toString() ? (
-                          <>
-                            <Check className="h-4 w-4 mr-2" />
-                            Copied
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="h-4 w-4 mr-2" />
-                            Copy
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      {!isUser && (
-                        <>
-                          <DropdownMenuItem
-                            onClick={() => handleReaction("like")}
-                          >
-                            <ThumbsUp className="h-4 w-4 mr-2" />
-                            Like ({(message.reactions?.like as number) || 0})
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleReaction("dislike")}
-                          >
-                            <ThumbsDown className="h-4 w-4 mr-2" />
-                            Dislike (
-                            {(message.reactions?.dislike as number) || 0})
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                      <DropdownMenuItem
-                        onClick={handleDeleteMessage}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </div>
 
               {/* Message Content */}
-              <div className="whitespace-pre-wrap break-words">
-                {isThinking ? (
-                  <div className="flex items-center space-x-2 text-sm font-medium py-1">
-                    {/* Loader is now with the status badge, text is more prominent */}
-                    <span>{currentThinkingText}</span>
-                  </div>
-                ) : (
-                  <MarkdownMessage 
-                    content={message.content} 
-                    className={isUser ? "text-primary-foreground" : ""} 
-                  />
-                )}
-              </div>
+              {/* Hide text content if there's a dish selection widget to avoid duplication */}
+              {!message.attachments?.widgets?.some(widget => widget.widget_type === "dish_selection") && (
+                <div className="whitespace-pre-wrap break-words">
+                  {isThinking ? (
+                    <div className="flex items-center space-x-2 text-sm font-medium py-1">
+                      {/* Loader is now with the status badge, text is more prominent */}
+                      <span>{currentThinkingText}</span>
+                    </div>
+                  ) : (
+                    <MarkdownMessage 
+                      content={message.content} 
+                      className={isUser ? "text-gray-900" : "text-gray-900"} 
+                    />
+                  )}
+                </div>
+              )}
 
               {/* Display images ONLY for user messages - AI should never display images */}
               {message.is_user_message && (message.message_type === "image" || (message.attachments?.images && message.attachments.images.length > 0)) && (
@@ -501,23 +422,7 @@ function MessageBubble({ message }: { message: Message }) {
                 </div>
               )}
 
-              {!isUser &&
-                !isThinking &&
-                (message.input_tokens ||
-                  0 > 0 ||
-                  message.output_tokens ||
-                  0 > 0) && (
-                  <div className="flex items-center space-x-2 mt-2 text-xs opacity-70">
-                    <span>
-                      Tokens:{" "}
-                      {(message.input_tokens || 0) +
-                        (message.output_tokens || 0)}
-                    </span>
-                    {message.llm_model_id && (
-                      <span>Model: {message.llm_model_id}</span>
-                    )}
-                  </div>
-                )}
+              {/* Removed tokens display for cleaner UI */}
             </CardContent>
           </Card>
         </div>

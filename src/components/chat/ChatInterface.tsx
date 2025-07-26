@@ -82,9 +82,6 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
                       {conversation.title}
                     </h2>
                     <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                      <Badge variant="outline" className="text-xs">
-                        ID: {conversation.id}
-                      </Badge>
                       <Badge
                         variant={
                           conversation.status === "active"

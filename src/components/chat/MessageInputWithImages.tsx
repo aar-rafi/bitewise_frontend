@@ -141,44 +141,53 @@ export function MessageInputWithImages({
   const canSend = (message.trim() || selectedImages.length > 0) && !isSending;
 
   return (
-    <div className="border-t bg-background">
+    <div className="border-t bg-white shadow-sm">
       {/* Image Preview Bar - shown when images are selected */}
       {selectedImages.length > 0 && (
-        <div className="border-b p-3 bg-muted/20">
-          <div className="flex items-center gap-2 mb-2">
-            <ImageIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">
-              {selectedImages.length} image{selectedImages.length !== 1 ? 's' : ''} attached
-            </span>
+        <div className="border-b border-gray-200 p-4 bg-blue-50/50">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-blue-100 rounded-md">
+                <ImageIcon className="h-4 w-4 text-blue-600" />
+              </div>
+              <span className="text-sm font-semibold text-gray-900">
+                {selectedImages.length} image{selectedImages.length !== 1 ? 's' : ''} attached
+              </span>
+            </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={removeAllImages}
               disabled={isSending}
-              className="ml-auto h-6 px-2"
+              className="ml-auto h-7 px-3 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
             >
               <X className="h-3 w-3 mr-1" />
               Remove All
             </Button>
           </div>
           
-          <div className="flex gap-2 overflow-x-auto">
+          <div className="flex gap-3 overflow-x-auto pb-1">
             {selectedImages.map((file, index) => (
               <div key={index} className="relative flex-shrink-0 group">
                 <img
                   src={imagePreviews[index]}
                   alt={`Preview ${index + 1}`}
-                  className="w-16 h-16 object-cover rounded border"
+                  className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
                 />
                 <Button
                   variant="destructive"
                   size="sm"
-                  className="absolute -top-1 -right-1 h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={() => removeImage(index)}
                   disabled={isSending}
                 >
-                  <X className="h-2 w-2" />
+                  <X className="h-3 w-3" />
                 </Button>
+                <div className="absolute bottom-1 left-1 right-1">
+                  <div className="bg-black/70 text-white text-xs px-1.5 py-0.5 rounded text-center truncate">
+                    {file.name}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -187,7 +196,7 @@ export function MessageInputWithImages({
 
       {/* Main Input Area */}
       <div className="p-4">
-        <div className="flex items-end gap-2">
+        <div className="flex items-end gap-3">
           {/* Image Upload Button */}
           <Popover open={showImageUpload} onOpenChange={setShowImageUpload}>
             <PopoverTrigger asChild>
@@ -195,7 +204,8 @@ export function MessageInputWithImages({
                 variant="outline"
                 size="sm"
                 disabled={disabled || isSending}
-                className="h-10 px-3"
+                className="h-10 px-3 border-gray-300 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                title="Attach images"
               >
                 <ImageIcon className="h-4 w-4" />
               </Button>
@@ -220,23 +230,16 @@ export function MessageInputWithImages({
                 : placeholder
               }
               disabled={disabled || isSending}
-              className="min-h-[40px] max-h-[120px] resize-none pr-12"
+              className="min-h-[44px] max-h-[120px] resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               rows={1}
             />
-            
-            {/* Character counter - positioned absolutely */}
-            {message.length > 0 && (
-              <span className="absolute bottom-1 right-14 text-xs text-muted-foreground">
-                {message.length}
-              </span>
-            )}
           </div>
 
           {/* Send Button */}
           <Button
             onClick={handleSendMessage}
             disabled={!canSend || disabled}
-            className="h-10 px-4"
+            className="h-10 px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium"
           >
             {isSending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -246,21 +249,28 @@ export function MessageInputWithImages({
           </Button>
         </div>
 
-        {/* Help Text */}
-        <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
-          <span>
-            {selectedImages.length > 0 && (
-              <span className="text-primary font-medium">
-                {selectedImages.length} image{selectedImages.length !== 1 ? 's' : ''} attached •{' '}
+        {/* Help Text - Now with better readability */}
+        <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-600 font-medium">
+              Press Enter to send, Shift+Enter for new line
+            </span>
+            {message.length > 0 && (
+              <span className="text-xs text-gray-500">
+                {message.length} characters
               </span>
             )}
-            Press Enter to send, Shift+Enter for new line
-          </span>
+          </div>
           
           {selectedImages.length > 0 && (
-            <span>
-              Total size: {(selectedImages.reduce((sum, file) => sum + file.size, 0) / (1024 * 1024)).toFixed(2)} MB
-            </span>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                {selectedImages.length} image{selectedImages.length !== 1 ? 's' : ''}
+              </Badge>
+              <span className="text-xs text-gray-500">
+                {(selectedImages.reduce((sum, file) => sum + file.size, 0) / (1024 * 1024)).toFixed(2)} MB
+              </span>
+            </div>
           )}
         </div>
       </div>

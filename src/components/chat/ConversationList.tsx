@@ -266,11 +266,7 @@ export function ConversationList({
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <div className="flex items-center">
-                  <MessageCircle className="h-3 w-3 mr-1" />
-                  ID: {conversation.id}
-                </div>
+              <div className="flex items-center justify-end text-xs text-muted-foreground">
                 <div>
                   {formatDistanceToNow(new Date(conversation.updated_at), {
                     addSuffix: true,

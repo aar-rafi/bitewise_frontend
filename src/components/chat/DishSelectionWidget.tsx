@@ -40,85 +40,93 @@ function DishCardComponent({
     return (
         <div
             className={`
-                border rounded-lg p-3 transition-all cursor-pointer relative
+                flex-shrink-0 w-72 bg-white rounded-xl border-2 transition-all duration-300 cursor-pointer
+                hover:shadow-lg hover:-translate-y-1 relative overflow-hidden
                 ${isSelected
                     ? wasSelectedInResolved
-                        ? "border-green-500 bg-green-50/50" // Different styling for resolved selection
-                        : "border-blue-500 bg-blue-50/50" // Active selection
+                        ? "border-green-500 shadow-green-100 shadow-lg" // Resolved selection
+                        : "border-blue-500 shadow-blue-100 shadow-lg" // Active selection
                     : "border-gray-200 hover:border-gray-300"
                 }
-                ${isResolved && !wasSelectedInResolved ? "opacity-50" : ""}
+                ${isResolved && !wasSelectedInResolved ? "opacity-60" : ""}
                 ${disabled ? "cursor-not-allowed" : ""}
             `}
             onClick={() => !isResolved && onSelect()}
         >
+            {/* Selection Badge */}
             {wasSelectedInResolved && (
-                <div className="absolute top-2 right-2">
-                    <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
+                <div className="absolute top-3 right-3 z-10">
+                    <Badge className="bg-green-500 text-white border-green-600 shadow-md">
                         <Check className="h-3 w-3 mr-1" />
                         Selected
                     </Badge>
                 </div>
             )}
 
-            <div className="flex gap-3">
-                {/* Thumbnail */}
-                <div className="flex-shrink-0">
-                    {dish.image_url ? (
-                        <img
-                            src={dish.image_url}
-                            alt={dish.name}
-                            className="w-12 h-12 rounded-md object-cover"
-                            onError={(e) => {
-                                e.currentTarget.src = `data:image/svg+xml,${encodeURIComponent(`
-                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <rect width="48" height="48" fill="#f3f4f6"/>
-                                        <path d="M24 14c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-8 8h16v8l-4-3-4 4-4-3v-6z" fill="#9ca3af"/>
-                                    </svg>
-                                `)}`;
-                            }}
-                        />
-                    ) : (
-                        <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-gray-400">
-                                <path d="M12 7c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-4 4h8v4l-2-1.5-2 2-2-1.5V11z" fill="currentColor"/>
-                            </svg>
+            {/* Image Container */}
+            <div className="relative h-40 overflow-hidden">
+                {dish.image_url ? (
+                    <img
+                        src={dish.image_url}
+                        alt={dish.name}
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        onError={(e) => {
+                            e.currentTarget.src = `data:image/svg+xml,${encodeURIComponent(`
+                                <svg width="288" height="160" viewBox="0 0 288 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect width="288" height="160" fill="#f8fafc"/>
+                                    <circle cx="144" cy="80" r="24" fill="#e2e8f0"/>
+                                    <path d="M132 68c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4zm12 8h-24v12l6-4.5 6 6 6-4.5 6 1v-10z" fill="#94a3b8"/>
+                                </svg>
+                            `)}`;
+                        }}
+                    />
+                ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <div className="text-center">
+                            <Utensils className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                            <span className="text-sm text-gray-500">No image</span>
                         </div>
+                    </div>
+                )}
+                
+                {/* Calories Badge */}
+                {dish.calories && (
+                    <div className="absolute bottom-3 left-3">
+                        <Badge variant="secondary" className="bg-black/70 text-white border-none backdrop-blur-sm">
+                            {dish.calories} cal
+                        </Badge>
+                    </div>
+                )}
+            </div>
+
+            {/* Content */}
+            <div className="p-4">
+                <div className="mb-3">
+                    <h4 className={`text-lg font-bold text-gray-900 mb-1 line-clamp-1 ${wasSelectedInResolved ? "text-green-700" : ""}`}>
+                        {dish.name}
+                    </h4>
+                    {dish.description && (
+                        <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                            {dish.description}
+                        </p>
                     )}
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                            <h4 className={`text-sm font-semibold text-gray-900 truncate ${wasSelectedInResolved ? "text-green-700" : ""}`}>
-                                {dish.name}
-                            </h4>
-                            {dish.description && (
-                                <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                                    {dish.description}
-                                </p>
-                            )}
-                            <div className="flex items-center gap-2 mt-2">
-                                {dish.cuisine && (
-                                    <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                                        {dish.cuisine}
-                                    </Badge>
-                                )}
-                                {dish.calories && (
-                                    <span className="text-xs text-gray-500">
-                                        {dish.calories} cal
-                                    </span>
-                                )}
-                            </div>
-                        </div>
+                {/* Cuisine Badge */}
+                {dish.cuisine && (
+                    <div className="mb-4">
+                        <Badge variant="outline" className="text-xs font-medium border-blue-200 text-blue-700 bg-blue-50">
+                            {dish.cuisine}
+                        </Badge>
                     </div>
+                )}
 
-                    {/* Portion Control and Action */}
-                    {isSelected && (
-                        <div className="mt-3 flex items-center gap-2">
-                            <div className="flex items-center gap-1">
-                                <label className="text-xs text-gray-600">Portion:</label>
+                {/* Portion Control and Action */}
+                {isSelected && (
+                    <div className="border-t pt-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium text-gray-700">Portion Size</label>
+                            <div className="flex items-center gap-2">
                                 <Input
                                     type="number"
                                     min="0.1"
@@ -126,41 +134,62 @@ function DishCardComponent({
                                     step="0.1"
                                     value={portionSize}
                                     onChange={(e) => onPortionChange(Number(e.target.value))}
-                                    className="w-16 h-7 text-xs"
+                                    className="w-20 h-8 text-sm text-center"
                                     disabled={isResolved}
                                 />
-                                <span className="text-xs text-gray-500">×</span>
+                                <span className="text-sm text-gray-500">× serving</span>
                             </div>
-
-                            {!isResolved && (
-                                <Button
-                                    size="sm"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onConfirm();
-                                    }}
-                                    disabled={isConfirming}
-                                    className="h-7 px-3 text-xs"
-                                >
-                                    {isConfirming ? (
-                                        <>
-                                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                            Logging...
-                                        </>
-                                    ) : (
-                                        "Confirm"
-                                    )}
-                                </Button>
-                            )}
-
-                            {wasSelectedInResolved && (
-                                <div className="text-xs text-green-600 font-medium">
-                                    ✓ Logged {portionSize}× serving
-                                </div>
-                            )}
                         </div>
-                    )}
-                </div>
+
+                        {!isResolved && (
+                            <Button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onConfirm();
+                                }}
+                                disabled={isConfirming}
+                                className="w-full h-10 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                            >
+                                {isConfirming ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        Logging intake...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Check className="h-4 w-4 mr-2" />
+                                        Confirm Selection
+                                    </>
+                                )}
+                            </Button>
+                        )}
+
+                        {wasSelectedInResolved && (
+                            <div className="text-center py-2">
+                                <div className="inline-flex items-center gap-2 text-sm text-green-600 font-medium bg-green-50 px-3 py-1.5 rounded-full">
+                                    <Check className="h-4 w-4" />
+                                    Logged {portionSize}× serving
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Call to Action for unselected items */}
+                {!isSelected && !isResolved && (
+                    <div className="border-t pt-4">
+                        <Button 
+                            variant="outline" 
+                            className="w-full h-10 border-gray-300 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onSelect();
+                            }}
+                        >
+                            Select This Dish
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -203,93 +232,107 @@ export function DishSelectionWidget({ widget }: DishSelectionWidgetProps) {
 
     const handleConfirm = (dishId: number) => {
         if (widget.status === "resolved") return; // Don't allow confirmation if resolved
-
+        
         const portionSize = portionSizes[dishId] || 1.0;
 
         confirmSelection({
             widgetId: widget.widget_id,
             dishId: dishId,
-            portionSize: portionSize
+            portionSize: portionSize,
         }, {
             onSuccess: () => {
                 toast({
-                    title: "Intake Logged!",
-                    description: "Your meal has been successfully recorded.",
+                    title: "Intake logged successfully!",
+                    description: "Your meal has been added to your nutrition tracking.",
                 });
             },
             onError: (error) => {
-                console.error("Failed to confirm selection:", error);
+                console.error('Confirmation error:', error);
                 toast({
-                    title: "Error",
-                    description: "Failed to log your intake. Please try again.",
+                    title: "Error logging intake",
+                    description: "Failed to log your meal. Please try again.",
                     variant: "destructive",
                 });
-            }
+            },
         });
     };
 
     const isResolved = widget.status === "resolved";
 
     return (
-        <Card className="max-w-2xl mx-auto border-primary/20">
-            <CardHeader className="pb-3">
+        <Card className="max-w-full mx-auto border-primary/20 bg-gradient-to-br from-blue-50/30 to-purple-50/30">
+            <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <Utensils className="h-5 w-5" />
-                        {isResolved ? "Dish Selection - Completed" : "Choose Your Dish"}
+                    <CardTitle className="text-xl font-bold flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                            <Utensils className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <span>
+                            {isResolved ? "Dish Selection - Completed" : "Choose Your Dish"}
+                        </span>
                     </CardTitle>
                     {isResolved && (
-                        <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">
-                            <Check className="h-3 w-3 mr-1" />
-                            Logged
+                        <Badge className="bg-green-500 text-white border-green-600 px-3 py-1">
+                            <Check className="h-4 w-4 mr-1" />
+                            Completed
                         </Badge>
                     )}
                 </div>
-                {!isResolved && (
-                    <p className="text-sm text-muted-foreground">
-                        Select the dish that best matches what you ate and adjust the portion size if needed.
-                    </p>
-                )}
-                {isResolved && (
-                    <p className="text-sm text-muted-foreground">
-                        Your intake has been successfully logged. The selected dish is highlighted below.
-                    </p>
-                )}
+                <div className="mt-2">
+                    {!isResolved ? (
+                        <p className="text-gray-600 leading-relaxed">
+                            Select the dish that best matches what you ate and adjust the portion size if needed.
+                        </p>
+                    ) : (
+                        <p className="text-gray-600 leading-relaxed">
+                            Your intake has been successfully logged. The selected dish is highlighted below.
+                        </p>
+                    )}
+                </div>
             </CardHeader>
 
             <CardContent>
-                <div className="space-y-2">
-                    {widget.dishes.length > 0 ? (
-                        widget.dishes.map((dish) => {
-                            const isSelected = selectedDishId === dish.id;
-                            const wasSelectedInResolved = isResolved && widget.selected_dish_id === dish.id;
+                {widget.dishes.length > 0 ? (
+                    <div className="relative">
+                        {/* Horizontal scroll container */}
+                        <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                            {widget.dishes.map((dish) => {
+                                const isSelected = selectedDishId === dish.id;
+                                const wasSelectedInResolved = isResolved && widget.selected_dish_id === dish.id;
 
-                            return (
-                                <DishCardComponent
-                                    key={dish.id}
-                                    dish={dish}
-                                    isSelected={isSelected || wasSelectedInResolved}
-                                    isResolved={isResolved}
-                                    wasSelectedInResolved={wasSelectedInResolved}
-                                    portionSize={
-                                        wasSelectedInResolved 
-                                            ? (widget.selected_portion || 1.0)
-                                            : (portionSizes[dish.id] || 1.0)
-                                    }
-                                    onPortionChange={(portion) => handlePortionChange(dish.id, portion)}
-                                    onSelect={() => handleDishSelect(dish.id)}
-                                    onConfirm={() => handleConfirm(dish.id)}
-                                    isConfirming={isConfirming}
-                                    disabled={isResolved || isConfirming}
-                                />
-                            );
-                        })
-                    ) : (
-                        <div className="text-center py-4 text-muted-foreground">
-                            No dishes found for your search.
+                                return (
+                                    <DishCardComponent
+                                        key={dish.id}
+                                        dish={dish}
+                                        isSelected={isSelected || wasSelectedInResolved}
+                                        isResolved={isResolved}
+                                        wasSelectedInResolved={wasSelectedInResolved}
+                                        portionSize={
+                                            wasSelectedInResolved 
+                                                ? (widget.selected_portion || 1.0)
+                                                : (portionSizes[dish.id] || 1.0)
+                                        }
+                                        onPortionChange={(portion) => handlePortionChange(dish.id, portion)}
+                                        onSelect={() => handleDishSelect(dish.id)}
+                                        onConfirm={() => handleConfirm(dish.id)}
+                                        isConfirming={isConfirming}
+                                        disabled={isResolved || isConfirming}
+                                    />
+                                );
+                            })}
                         </div>
-                    )}
-                </div>
+                    </div>
+                ) : (
+                    <div className="text-center py-12">
+                        <div className="max-w-sm mx-auto">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Utensils className="h-8 w-8 text-gray-400" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">No dishes found</h3>
+                            <p className="text-gray-500">No dishes were found for your search. Try describing your meal differently.</p>
+                        </div>
+                    </div>
+                )}
             </CardContent>
         </Card>
     );

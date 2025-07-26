@@ -117,13 +117,13 @@ export function ConversationList({
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Conversations</h2>
-          <Skeleton className="h-9 w-9" />
+          <h2 className="text-base font-semibold">Conversations</h2>
+          <Skeleton className="h-8 w-8" />
         </div>
         {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full" />
+          <Skeleton key={i} className="h-12 w-full" />
         ))}
       </div>
     );
@@ -138,12 +138,12 @@ export function ConversationList({
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Conversations</h2>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-base font-semibold">Conversations</h2>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm">
+            <Button size="sm" className="h-8 w-8 p-0">
               <Plus className="h-4 w-4" />
             </Button>
           </DialogTrigger>
@@ -187,7 +187,7 @@ export function ConversationList({
         </Dialog>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         {conversations.map((conversation) => (
           <Card
             key={conversation.id}
@@ -198,80 +198,70 @@ export function ConversationList({
             }`}
             onClick={() => onSelectConversation(conversation.id)}
           >
-            <CardHeader className="pb-2">
+            <CardContent className="p-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium truncate">
-                  {conversation.title}
-                </CardTitle>
-                <div className="flex items-center space-x-1">
-                  <Badge
-                    variant={
-                      conversation.status === "active" ? "default" : "secondary"
-                    }
-                  >
-                    {conversation.status}
-                  </Badge>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingConversation(conversation);
-                          setEditTitle(conversation.title);
-                        }}
-                      >
-                        <Edit2 className="h-4 w-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleArchiveConversation(conversation);
-                        }}
-                      >
-                        {conversation.status === "active" ? (
-                          <>
-                            <Archive className="h-4 w-4 mr-2" />
-                            Archive
-                          </>
-                        ) : (
-                          <>
-                            <ArchiveRestore className="h-4 w-4 mr-2" />
-                            Unarchive
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteConversation(conversation.id);
-                        }}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium truncate mb-1">
+                    {conversation.title}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(new Date(conversation.updated_at), {
+                      addSuffix: true,
+                    })}
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex items-center justify-end text-xs text-muted-foreground">
-                <div>
-                  {formatDistanceToNow(new Date(conversation.updated_at), {
-                    addSuffix: true,
-                  })}
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 ml-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MoreVertical className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingConversation(conversation);
+                        setEditTitle(conversation.title);
+                      }}
+                    >
+                      <Edit2 className="h-4 w-4 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleArchiveConversation(conversation);
+                      }}
+                    >
+                      {conversation.status === "active" ? (
+                        <>
+                          <Archive className="h-4 w-4 mr-2" />
+                          Archive
+                        </>
+                      ) : (
+                        <>
+                          <ArchiveRestore className="h-4 w-4 mr-2" />
+                          Unarchive
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteConversation(conversation.id);
+                      }}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </CardContent>
           </Card>

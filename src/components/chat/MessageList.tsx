@@ -47,8 +47,6 @@ interface MessageListProps {
 
 // Component for displaying images in messages
 function MessageImages({ message }: { message: Message }) {
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
-  
   // Clean up blob URLs when component unmounts (only for user messages with local URLs)
   useEffect(() => {
     return () => {
@@ -68,134 +66,42 @@ function MessageImages({ message }: { message: Message }) {
 
   const images = message.attachments.images;
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
   return (
-    <>
-      <div className="mt-3 space-y-2">
-        {/* Images display - Match dish widget size */}
-        <div className={`flex gap-4 overflow-x-auto pb-2 ${
-          images.length === 1 
-            ? 'justify-start' 
-            : ''
-        }`}>
-          {images.map((image, index) => (
-            <div
-              key={index}
-              className="relative group flex-shrink-0 w-72 bg-green-50/60 backdrop-blur-sm rounded-xl border-2 border-green-200/50 overflow-hidden cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 hover:bg-green-50/80"
-              onClick={() => setSelectedImageIndex(index)}
-            >
-              {/* Image Container - Match dish widget image area */}
-              <div className="relative h-40 overflow-hidden">
-                <img
-                  src={image.url}
-                  alt={image.filename}
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                  loading="lazy"
-                />
-                
-                {/* Overlay with zoom icon */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ZoomIn className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                
-                {/* Image number badge for multiple images */}
-                {images.length > 1 && (
-                  <Badge 
-                    variant="secondary" 
-                    className="absolute top-3 left-3 bg-black/70 text-white border-none backdrop-blur-sm"
-                  >
-                    {index + 1}
-                  </Badge>
-                )}
-              </div>
+    <div className="mt-3 space-y-2">
+      {/* Images display - Match dish widget size */}
+      <div className={`flex gap-4 overflow-x-auto pb-2 ${
+        images.length === 1 
+          ? 'justify-start' 
+          : ''
+      }`}>
+        {images.map((image, index) => (
+          <div
+            key={index}
+            className="relative group flex-shrink-0 w-72 bg-green-50/60 backdrop-blur-sm rounded-xl border-2 border-green-200/50 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 hover:bg-green-50/80"
+          >
+            {/* Image Container - Match dish widget image area */}
+            <div className="relative h-40 overflow-hidden">
+              <img
+                src={image.url}
+                alt={image.filename}
+                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                loading="lazy"
+              />
+              
+              {/* Image number badge for multiple images */}
+              {images.length > 1 && (
+                <Badge 
+                  variant="secondary" 
+                  className="absolute top-3 left-3 bg-black/70 text-white border-none backdrop-blur-sm"
+                >
+                  {index + 1}
+                </Badge>
+              )}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
-
-      {/* Image viewer dialog */}
-      <Dialog open={selectedImageIndex !== null} onOpenChange={() => setSelectedImageIndex(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] p-2">
-          {selectedImageIndex !== null && (
-            <>
-              <DialogHeader className="px-4 py-2">
-                <DialogTitle className="flex items-center justify-between">
-                  <span>{images[selectedImageIndex].filename}</span>
-                  <div className="flex items-center gap-2">
-                    {images.length > 1 && (
-                      <span className="text-sm text-muted-foreground">
-                        {selectedImageIndex + 1} of {images.length}
-                      </span>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = images[selectedImageIndex].url;
-                        link.download = images[selectedImageIndex].filename;
-                        link.click();
-                      }}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </DialogTitle>
-              </DialogHeader>
-              
-              <div className="relative flex items-center justify-center p-4">
-                <img
-                  src={images[selectedImageIndex].url}
-                  alt={images[selectedImageIndex].filename}
-                  className="max-w-full max-h-[70vh] object-contain rounded-lg"
-                />
-                
-                {/* Navigation buttons for multiple images */}
-                {images.length > 1 && (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="absolute left-2 top-1/2 -translate-y-1/2"
-                      onClick={() => setSelectedImageIndex(
-                        selectedImageIndex === 0 ? images.length - 1 : selectedImageIndex - 1
-                      )}
-                    >
-                      ←
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="absolute right-2 top-1/2 -translate-y-1/2"
-                      onClick={() => setSelectedImageIndex(
-                        selectedImageIndex === images.length - 1 ? 0 : selectedImageIndex + 1
-                      )}
-                    >
-                      →
-                    </Button>
-                  </>
-                )}
-              </div>
-              
-              <div className="px-4 pb-2">
-                <div className="text-sm text-muted-foreground">
-                  {formatFileSize(images[selectedImageIndex].size)} • {images[selectedImageIndex].content_type}
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+    </div>
   );
 }
 

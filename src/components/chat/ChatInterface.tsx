@@ -81,7 +81,7 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
                     <h2 className="font-semibold text-lg truncate max-w-[300px]">
                       {conversation.title}
                     </h2>
-                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    {/* <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                       <Badge
                         variant={
                           conversation.status === "active"
@@ -92,7 +92,7 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
                       >
                         {conversation.status}
                       </Badge>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 

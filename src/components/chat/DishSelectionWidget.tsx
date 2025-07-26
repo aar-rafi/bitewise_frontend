@@ -260,17 +260,18 @@ export function DishSelectionWidget({ widget }: DishSelectionWidgetProps) {
     const isResolved = widget.status === "resolved";
 
     return (
-        <Card className="max-w-full mx-auto border-primary/20 bg-gradient-to-br from-blue-50/30 to-purple-50/30">
-            <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                    <CardTitle className="text-xl font-bold flex items-center gap-3">
+        <div className="w-full">
+            {/* Header Section */}
+            <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-100 rounded-lg">
                             <Utensils className="h-6 w-6 text-blue-600" />
                         </div>
-                        <span>
+                        <h3 className="text-xl font-bold text-gray-900">
                             {isResolved ? "Dish Selection - Completed" : "Choose Your Dish"}
-                        </span>
-                    </CardTitle>
+                        </h3>
+                    </div>
                     {isResolved && (
                         <Badge className="bg-green-500 text-white border-green-600 px-3 py-1">
                             <Check className="h-4 w-4 mr-1" />
@@ -278,62 +279,64 @@ export function DishSelectionWidget({ widget }: DishSelectionWidgetProps) {
                         </Badge>
                     )}
                 </div>
-                <div className="mt-2">
+                <p className="text-gray-600 leading-relaxed">
                     {!isResolved ? (
-                        <p className="text-gray-600 leading-relaxed">
-                            Select the dish that best matches what you ate and adjust the portion size if needed.
-                        </p>
+                        "Select the dish that best matches what you ate and adjust the portion size if needed."
                     ) : (
-                        <p className="text-gray-600 leading-relaxed">
-                            Your intake has been successfully logged. The selected dish is highlighted below.
-                        </p>
+                        "Your intake has been successfully logged. The selected dish is highlighted below."
+                    )}
+                </p>
+            </div>
+
+            {/* Dish Cards - Full Width Scrollable */}
+            {widget.dishes.length > 0 ? (
+                <div className="w-full">
+                    {/* Horizontal scroll container - full width */}
+                    <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                        {widget.dishes.map((dish) => {
+                            const isSelected = selectedDishId === dish.id;
+                            const wasSelectedInResolved = isResolved && widget.selected_dish_id === dish.id;
+
+                            return (
+                                <DishCardComponent
+                                    key={dish.id}
+                                    dish={dish}
+                                    isSelected={isSelected || wasSelectedInResolved}
+                                    isResolved={isResolved}
+                                    wasSelectedInResolved={wasSelectedInResolved}
+                                    portionSize={
+                                        wasSelectedInResolved 
+                                            ? (widget.selected_portion || 1.0)
+                                            : (portionSizes[dish.id] || 1.0)
+                                    }
+                                    onPortionChange={(portion) => handlePortionChange(dish.id, portion)}
+                                    onSelect={() => handleDishSelect(dish.id)}
+                                    onConfirm={() => handleConfirm(dish.id)}
+                                    isConfirming={isConfirming}
+                                    disabled={isResolved || isConfirming}
+                                />
+                            );
+                        })}
+                    </div>
+                    
+                    {/* Scroll hint for mobile */}
+                    {widget.dishes.length > 1 && (
+                        <div className="text-center mt-2">
+                            <p className="text-xs text-gray-500">← Scroll horizontally to see more options →</p>
+                        </div>
                     )}
                 </div>
-            </CardHeader>
-
-            <CardContent>
-                {widget.dishes.length > 0 ? (
-                    <div className="relative">
-                        {/* Horizontal scroll container */}
-                        <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                            {widget.dishes.map((dish) => {
-                                const isSelected = selectedDishId === dish.id;
-                                const wasSelectedInResolved = isResolved && widget.selected_dish_id === dish.id;
-
-                                return (
-                                    <DishCardComponent
-                                        key={dish.id}
-                                        dish={dish}
-                                        isSelected={isSelected || wasSelectedInResolved}
-                                        isResolved={isResolved}
-                                        wasSelectedInResolved={wasSelectedInResolved}
-                                        portionSize={
-                                            wasSelectedInResolved 
-                                                ? (widget.selected_portion || 1.0)
-                                                : (portionSizes[dish.id] || 1.0)
-                                        }
-                                        onPortionChange={(portion) => handlePortionChange(dish.id, portion)}
-                                        onSelect={() => handleDishSelect(dish.id)}
-                                        onConfirm={() => handleConfirm(dish.id)}
-                                        isConfirming={isConfirming}
-                                        disabled={isResolved || isConfirming}
-                                    />
-                                );
-                            })}
+            ) : (
+                <div className="text-center py-12">
+                    <div className="max-w-sm mx-auto">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Utensils className="h-8 w-8 text-gray-400" />
                         </div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No dishes found</h3>
+                        <p className="text-gray-500">No dishes were found for your search. Try describing your meal differently.</p>
                     </div>
-                ) : (
-                    <div className="text-center py-12">
-                        <div className="max-w-sm mx-auto">
-                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Utensils className="h-8 w-8 text-gray-400" />
-                            </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">No dishes found</h3>
-                            <p className="text-gray-500">No dishes were found for your search. Try describing your meal differently.</p>
-                        </div>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
+                </div>
+            )}
+        </div>
     );
 } 

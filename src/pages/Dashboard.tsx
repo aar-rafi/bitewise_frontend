@@ -1,48 +1,44 @@
 import { useIntakesToday } from "@/hooks/useIntakes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { AlertCircle, TrendingUp, Droplets, Zap } from "lucide-react";
+import { AlertCircle, Plus, User, Droplets, Zap, Activity, Utensils, Clock, Calendar, GlassWater, Sparkles } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import LogIntakeDialog from "@/components/LogIntakeDialog";
 import AnimatedNumber from "@/components/AnimatedNumber";
 import AppHeader from "@/components/AppHeader";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
+  ResponsiveContainer,
 } from "recharts";
-import { useState } from "react";
-import {FileUpload} from "@/components/ui/file-upload";
+import { useState, useEffect } from "react";
 import { useTokenHandler } from "@/hooks/useTokenHandler";
 import NutritionLoadingAnimation from "@/components/NutritionLoadingAnimation";
 import ProgressiveLoadingAnimation from "@/components/ProgressiveLoadingAnimation";
+import { profileApi, UserProfile } from "@/lib/api";
+import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
   const { data, isLoading, error } = useIntakesToday();
-  const [files, setFiles] = useState<File[]>([]);
   const [showTokenProcessing, setShowTokenProcessing] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [waterIntake, setWaterIntake] = useState(0);
   
   // Handle OAuth tokens if present in URL
   const { isProcessingTokens } = useTokenHandler({
     onSuccess: (authData) => {
       console.log("OAuth authentication successful:", authData);
-      // Token storage is already handled by the hook
-      // Additional logic can be added here if needed
     },
     onError: (error) => {
       console.error("OAuth authentication error:", error);
-      // Error handling is already handled by the hook with toast
     },
     onProcessingStart: () => {
       setShowTokenProcessing(true);
@@ -51,11 +47,13 @@ export default function Dashboard() {
       setShowTokenProcessing(false);
     },
   });
-  
-  const handleFileUpload = (files: File[]) => {
-    setFiles(files);
-    console.log(files);
-  };
+
+  // Load profile data
+  useEffect(() => {
+    profileApi.getMe()
+      .then(setProfile)
+      .catch((e) => console.error("Failed to load profile:", e.message));
+  }, []);
 
   // Mock daily goals for progress calculation
   const dailyGoals = {
@@ -63,56 +61,40 @@ export default function Dashboard() {
     protein: 150,
     carbs: 250,
     fats: 65,
-    fiber: 25,
     water: 2000,
   };
 
-  // Prepare chart data
-  const macroData = data
-    ? [
-        {
-          name: "Protein",
-          value: parseFloat(data.nutritional_summary.total_protein_g || "0"),
-          color: "hsl(var(--nutrition-green))",
-          fill: "#4ade80",
-        },
-        {
-          name: "Carbs",
-          value: parseFloat(data.nutritional_summary.total_carbs_g || "0"),
-          color: "hsl(var(--nutrition-orange))",
-          fill: "#fb923c",
-        },
-        {
-          name: "Fats",
-          value: parseFloat(data.nutritional_summary.total_fats_g || "0"),
-          color: "hsl(var(--nutrition-amber))",
-          fill: "#f59e0b",
-        },
-      ]
-    : [];
+  // Calculate current values
+  const currentCalories = parseFloat(data?.nutritional_summary.total_calories || "0");
+  const currentProtein = parseFloat(data?.nutritional_summary.total_protein_g || "0");
+  const currentCarbs = parseFloat(data?.nutritional_summary.total_carbs_g || "0");
+  const currentFats = parseFloat(data?.nutritional_summary.total_fats_g || "0");
+  const currentWater = (data?.nutritional_summary.total_water_ml || 0) + waterIntake;
 
-  const chartConfig = {
-    protein: {
-      label: "Protein",
-      color: "#4ade80",
-    },
-    carbs: {
-      label: "Carbohydrates",
-      color: "#fb923c",
-    },
-    fats: {
-      label: "Fats",
-      color: "#f59e0b",
-    },
+  // Prepare circular chart data
+  const circularChartData = {
+    calories: [
+      { name: "consumed", value: currentCalories, color: "#ff6b35" },
+      { name: "remaining", value: Math.max(0, dailyGoals.calories - currentCalories), color: "#f0f0f5" }
+    ],
+    protein: [
+      { name: "consumed", value: currentProtein, color: "#00d4aa" },
+      { name: "remaining", value: Math.max(0, dailyGoals.protein - currentProtein), color: "#f0f0f5" }
+    ],
+    carbs: [
+      { name: "consumed", value: currentCarbs, color: "#ff9500" },
+      { name: "remaining", value: Math.max(0, dailyGoals.carbs - currentCarbs), color: "#f0f0f5" }
+    ]
+  };
+
+  const addWater = (amount: number) => {
+    setWaterIntake(prev => prev + amount);
   };
 
   if (error) {
     return (
       <div className="container py-8">
-        <Alert
-          variant="destructive"
-          className="animate-fade-in bg-red-500/20 border-red-500/30"
-        >
+        <Alert variant="destructive" className="animate-fade-in bg-red-500/20 border-red-500/30">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="text-red-200">
             Failed to load nutritional data
@@ -122,12 +104,6 @@ export default function Dashboard() {
     );
   }
 
-  const calculateProgress = (current: string | undefined, goal: number) => {
-    const currentValue = parseFloat(current || "0");
-    return Math.min((currentValue / goal) * 100, 100);
-  };
-
-  // Show loading animation during token processing or initial data loading
   if (showTokenProcessing || isProcessingTokens) {
     return (
       <NutritionLoadingAnimation 
@@ -137,288 +113,356 @@ export default function Dashboard() {
     );
   }
 
-  // Show progressive loading animation during data fetching
   if (isLoading) {
     return (
       <ProgressiveLoadingAnimation 
-        onComplete={() => {
-          // This will be called when the animation completes
-          // The actual data loading state will naturally transition
-        }}
+        onComplete={() => {}}
       />
     );
   }
 
+  const CircularStat = ({ data, title, current, goal, unit, color }: {
+    data: any[];
+    title: string;
+    current: number;
+    goal: number;
+    unit: string;
+    color: string;
+  }) => (
+    <div className="flex flex-col items-center p-4">
+      <div className="relative w-28 h-28 mb-3">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={38}
+              outerRadius={55}
+              startAngle={90}
+              endAngle={450}
+              dataKey="value"
+              stroke="none"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <div className="text-lg font-bold" style={{ color }}>
+            {Math.round((current / goal) * 100)}%
+          </div>
+        </div>
+      </div>
+      <div className="text-center">
+        <div className="text-sm font-medium text-gray-600 mb-1">{title}</div>
+        <div className="text-lg font-bold text-gray-800">
+          {Math.round(current)} / {goal}{unit}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Water bottle visualization component
+  const WaterBottle = ({ fillPercentage }: { fillPercentage: number }) => (
+    <div className="relative w-16 h-20 mx-auto mb-4">
+      <svg viewBox="0 0 120 150" className="w-full h-full transform rotate-45 scale-150">
+        {/* Bottle outline */}
+        <path
+          d="M35 28 L35 15 Q35 9 42 9 L78 9 Q85 9 85 15 L85 28 L92 38 Q100 45 100 55 L100 120 Q100 135 85 135 L35 135 Q20 135 20 120 L20 55 Q20 45 28 38 L35 28"
+          fill="none"
+          stroke="#0891b2"
+          strokeWidth="3"
+          className="drop-shadow-sm"
+        />
+        {/* Water fill */}
+        <path
+          d={`M28 ${140 - (fillPercentage * 1.1)} L92 ${140 - (fillPercentage * 1.1)} L92 120 Q92 128 85 128 L35 128 Q28 128 28 120 Z`}
+          fill="url(#waterGradient)"
+          className="transition-all duration-500"
+        />
+        {/* Bottle cap */}
+        <rect x="40" y="3" width="40" height="15" rx="4" fill="#64748b" />
+        
+        {/* Gradient definition */}
+        <defs>
+          <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#67e8f9" />
+            <stop offset="50%" stopColor="#22d3ee" />
+            <stop offset="100%" stopColor="#0891b2" />
+          </linearGradient>
+        </defs>
+        
+        {/* Water shine effect */}
+        <ellipse
+          cx="50"
+          cy={Math.max(45, 140 - (fillPercentage * 1.1) + 8)}
+          rx="12"
+          ry="6"
+          fill="rgba(255, 255, 255, 0.4)"
+          className="transition-all duration-500"
+        />
+      </svg>
+    </div>
+  );
+
   return (
-    <div className="container py-8 pb-24 space-y-8 relative z-10">
-      {/* Header with logout functionality */}
+    <div className="container py-6 pb-24 space-y-8 relative z-10">
+      {/* Header */}
       <AppHeader 
-        title="Today's Summary"
-        subtitle="Track your nutritional journey"
-      >
-        {/* <LogIntakeDialog /> */}
-      </AppHeader>
+        title="Dashboard"
+        subtitle="Your daily nutrition overview"
+      />
 
-      {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
-        {/* Calories Card with Glass Effect */}
-        <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-400/30 to-orange-500/30 backdrop-blur-sm border-2 border-yellow-500/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-300/20 to-transparent animate-glass-shimmer" />
-          <CardHeader className="pb-2 flex flex-row items-center space-y-0 space-x-2">
-            <Zap className="h-6 w-6 text-yellow-700 drop-shadow-sm" />
-            <CardTitle className="text-sm font-bold text-yellow-900 drop-shadow-sm">
-              Total Calories
+      {/* Bento Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 h-auto">
+        
+        {/* Profile Section - Large Bento Box */}
+        <Card className="lg:col-span-2 relative overflow-hidden bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50 border-0 shadow-2xl backdrop-blur-sm rounded-3xl group hover:shadow-3xl transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-indigo-600/10 opacity-60"></div>
+          <div className="absolute top-4 right-4">
+            <Sparkles className="h-5 w-5 text-blue-400 animate-pulse" />
+          </div>
+          <CardHeader className="pb-4 relative z-10">
+            <CardTitle className="text-lg font-bold text-indigo-900 flex items-center gap-3">
+              <User className="h-6 w-6" />
+              Profile
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {isLoading ? (
-              <Skeleton className="h-8 w-24" />
-            ) : (
-              <>
-                <div className="text-3xl font-bold text-yellow-950 drop-shadow-sm">
-                  <AnimatedNumber
-                    value={data?.nutritional_summary.total_calories}
-                    suffix=" kcal"
-                    className="text-3xl font-bold text-yellow-950 drop-shadow-sm"
-                  />
+          <CardContent className="space-y-6 relative z-10">
+            <div className="flex items-center space-x-4">
+              <Avatar className="w-16 h-16 border-4 border-white shadow-lg">
+                {profile?.profile_image_url && (
+                  <AvatarImage src={profile.profile_image_url} alt="Profile" />
+                )}
+                <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-xl">
+                  <User className="w-8 h-8" />
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="font-bold text-xl text-indigo-900 mb-1">
+                  {profile ? `${profile.first_name} ${profile.last_name}` : "Loading..."}
                 </div>
-                <Progress
-                  value={calculateProgress(
-                    data?.nutritional_summary.total_calories,
-                    dailyGoals.calories
-                  )}
-                  className="h-3"
-                />
-                <p className="text-xs text-yellow-800 font-medium drop-shadow-sm">
-                  {Math.round(
-                    calculateProgress(
-                      data?.nutritional_summary.total_calories || "0",
-                      dailyGoals.calories
-                    )
-                  )}
-                  % of daily goal
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Protein Card */}
-        <Card className="relative overflow-hidden bg-gradient-to-br from-green-400/30 to-emerald-500/30 border-2 border-green-500/50 hover:shadow-xl hover:shadow-green-500/25 transition-all duration-300 hover:scale-105">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-green-900 drop-shadow-sm">
-              Protein
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {isLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <>
-                <div className="text-3xl font-bold text-green-950 drop-shadow-sm">
-                  <AnimatedNumber
-                    value={data?.nutritional_summary.total_protein_g}
-                    suffix="g"
-                    className="text-3xl font-bold text-green-950 drop-shadow-sm"
-                  />
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                  {profile?.fitness_goals?.[0] || "Nutrition tracking"}
+                </Badge>
+              </div>
+            </div>
+            {profile && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-white/60 rounded-2xl backdrop-blur-sm">
+                  <div className="text-2xl font-bold text-indigo-900">{profile.weight_kg}</div>
+                  <div className="text-sm text-indigo-600 font-medium">Weight (kg)</div>
                 </div>
-                <Progress
-                  value={calculateProgress(
-                    data?.nutritional_summary.total_protein_g,
-                    dailyGoals.protein
-                  )}
-                  className="h-3 bg-green-200/50"
-                />
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Carbohydrates Card */}
-        <Card className="relative overflow-hidden bg-gradient-to-br from-orange-400/30 to-red-500/30 border-2 border-orange-500/50 hover:shadow-xl hover:shadow-orange-500/25 transition-all duration-300 hover:scale-105">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-orange-900 drop-shadow-sm">
-              Carbohydrates
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {isLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <>
-                <div className="text-3xl font-bold text-orange-950 drop-shadow-sm">
-                  <AnimatedNumber
-                    value={data?.nutritional_summary.total_carbs_g}
-                    suffix="g"
-                    className="text-3xl font-bold text-orange-950 drop-shadow-sm"
-                  />
+                <div className="text-center p-4 bg-white/60 rounded-2xl backdrop-blur-sm">
+                  <div className="text-2xl font-bold text-indigo-900">{profile.height_cm}</div>
+                  <div className="text-sm text-indigo-600 font-medium">Height (cm)</div>
                 </div>
-                <Progress
-                  value={calculateProgress(
-                    data?.nutritional_summary.total_carbs_g,
-                    dailyGoals.carbs
-                  )}
-                  className="h-3 bg-orange-200/50"
-                />
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Fats Card */}
-        <Card className="relative overflow-hidden bg-gradient-to-br from-amber-400/30 to-yellow-500/30 border-2 border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/25 transition-all duration-300 hover:scale-105">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-amber-900 drop-shadow-sm">
-              Fats
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {isLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <>
-                <div className="text-3xl font-bold text-amber-950 drop-shadow-sm">
-                  <AnimatedNumber
-                    value={data?.nutritional_summary.total_fats_g}
-                    suffix="g"
-                    className="text-3xl font-bold text-amber-950 drop-shadow-sm"
-                  />
-                </div>
-                <Progress
-                  value={calculateProgress(
-                    data?.nutritional_summary.total_fats_g,
-                    dailyGoals.fats
-                  )}
-                  className="h-3 bg-amber-200/50"
-                />
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
-        {/* Macronutrients Bar Chart */}
-        <Card className="col-span-1 lg:col-span-2 bg-gradient-to-br from-slate-700/20 to-slate-800/30 backdrop-blur-sm border-2 border-slate-600/50 shadow-xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-slate-900 font-bold drop-shadow-sm">
-              <TrendingUp className="h-6 w-6 text-nutrition-green drop-shadow-sm" />
-              Macronutrient Breakdown
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-64 w-full" />
-            ) : (
-              <ChartContainer config={chartConfig} className="h-64">
-                <BarChart data={macroData}>
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="value" radius={8}>
-                    {macroData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Secondary Nutrients */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
-        {/* Fiber Card */}
-        <Card className="bg-gradient-to-br from-emerald-400/30 to-green-600/30 border-2 border-emerald-500/50 shadow-xl hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-emerald-900 drop-shadow-sm">
-              Fiber
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {isLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-emerald-950 drop-shadow-sm">
-                  <AnimatedNumber
-                    value={data?.nutritional_summary.total_fiber_g}
-                    suffix="g"
-                    className="text-2xl font-bold text-emerald-950 drop-shadow-sm"
-                  />
-                </div>
-                <Progress
-                  value={calculateProgress(
-                    data?.nutritional_summary.total_fiber_g,
-                    dailyGoals.fiber
-                  )}
-                  className="h-3 bg-emerald-200/50"
-                />
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Sugar Card */}
-        <Card className="bg-gradient-to-br from-rose-400/30 to-pink-500/30 border-2 border-rose-500/50 shadow-xl hover:shadow-rose-500/25 transition-all duration-300 hover:scale-105">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-rose-900 drop-shadow-sm">
-              Sugar
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <div className="text-2xl font-bold text-rose-950 drop-shadow-sm">
-                <AnimatedNumber
-                  value={data?.nutritional_summary.total_sugar_g}
-                  suffix="g"
-                  className="text-2xl font-bold text-rose-950 drop-shadow-sm"
-                />
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Water Card */}
-        <Card className="bg-gradient-to-br from-blue-400/30 to-cyan-500/30 border-2 border-blue-500/50 shadow-xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105">
-          <CardHeader className="pb-2 flex flex-row items-center space-y-0 space-x-2">
-            <Droplets className="h-5 w-5 text-blue-700 drop-shadow-sm" />
-            <CardTitle className="text-sm font-bold text-blue-900 drop-shadow-sm">
-              Water
+        {/* Today's Progress - Large Bento Box */}
+        <Card className="lg:col-span-4 relative overflow-hidden bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 border-0 shadow-2xl backdrop-blur-sm rounded-3xl group hover:shadow-3xl transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 to-teal-600/10 opacity-60"></div>
+          <div className="absolute top-4 right-4">
+            <Activity className="h-6 w-6 text-emerald-400 animate-pulse" />
+          </div>
+          <CardHeader className="pb-4 relative z-10">
+            <CardTitle className="text-lg font-bold text-emerald-900 flex items-center gap-3">
+              <Zap className="h-6 w-6" />
+              Today's Progress
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {isLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-blue-950 drop-shadow-sm">
-                  <AnimatedNumber
-                    value={data?.nutritional_summary.total_water_ml}
-                    suffix="ml"
-                    className="text-2xl font-bold text-blue-950 drop-shadow-sm"
-                  />
-                </div>
-                <Progress
-                  value={calculateProgress(
-                    data?.nutritional_summary.total_water_ml?.toString(),
-                    dailyGoals.water
-                  )}
-                  className="h-3 bg-blue-200/50"
+          <CardContent className="relative z-10">
+            <div className="flex justify-around items-center">
+              <CircularStat
+                data={circularChartData.calories}
+                title="Calories"
+                current={currentCalories}
+                goal={dailyGoals.calories}
+                unit=" kcal"
+                color="#ff6b35"
+              />
+              <CircularStat
+                data={circularChartData.protein}
+                title="Protein"
+                current={currentProtein}
+                goal={dailyGoals.protein}
+                unit="g"
+                color="#00d4aa"
+              />
+              <CircularStat
+                data={circularChartData.carbs}
+                title="Carbs"
+                current={currentCarbs}
+                goal={dailyGoals.carbs}
+                unit="g"
+                color="#ff9500"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Water Intake - Enhanced with Bottle Visualization */}
+        <Card className="lg:col-span-2 relative overflow-hidden bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 border-0 shadow-2xl backdrop-blur-sm rounded-3xl group hover:shadow-3xl transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/10 to-blue-600/10 opacity-60"></div>
+          <div className="absolute top-4 right-4">
+            <GlassWater className="h-6 w-6 text-cyan-400 animate-pulse" />
+          </div>
+          <CardHeader className="pb-4 relative z-10">
+            <CardTitle className="text-lg font-bold text-cyan-900 flex items-center gap-3">
+              <Droplets className="h-6 w-6" />
+              Water Intake
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6 relative z-10">
+            {/* Water Bottle Visualization */}
+            <div className="text-center">
+              <WaterBottle fillPercentage={Math.min((currentWater / dailyGoals.water) * 100, 100)} />
+              <div className="text-3xl font-bold text-cyan-900 mb-2">
+                <AnimatedNumber
+                  value={currentWater.toString()}
+                  suffix=" ml"
+                  className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent"
                 />
-              </>
+              </div>
+              <div className="text-sm text-cyan-600 font-medium mb-4">
+                {Math.round((currentWater / dailyGoals.water) * 100)}% of daily goal
+              </div>
+              <Progress
+                value={Math.min((currentWater / dailyGoals.water) * 100, 100)}
+                className="h-3 bg-cyan-100 rounded-full mb-4"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => addWater(250)}
+                className="text-cyan-700 border-2 border-cyan-200 hover:bg-cyan-50 hover:border-cyan-300 rounded-xl font-semibold transition-all duration-200"
+              >
+                +250ml
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => addWater(500)}
+                className="text-cyan-700 border-2 border-cyan-200 hover:bg-cyan-50 hover:border-cyan-300 rounded-xl font-semibold transition-all duration-200"
+              >
+                +500ml
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => addWater(1000)}
+                className="text-cyan-700 border-2 border-cyan-200 hover:bg-cyan-50 hover:border-cyan-300 rounded-xl font-semibold transition-all duration-200"
+              >
+                +1L
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Today's Log */}
+        <Card className="lg:col-span-2 relative overflow-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 border-0 shadow-2xl backdrop-blur-sm rounded-3xl group hover:shadow-3xl transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-pink-600/10 opacity-60"></div>
+          <div className="absolute top-4 right-4">
+            <Clock className="h-6 w-6 text-purple-400 animate-pulse" />
+          </div>
+          <CardHeader className="pb-4 relative z-10">
+            <CardTitle className="text-lg font-bold text-purple-900 flex items-center gap-3">
+              <Calendar className="h-6 w-6" />
+              Today's Log
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 relative z-10">
+            {data?.intakes && data.intakes.length > 0 ? (
+              <div className="space-y-3 max-h-48 overflow-y-auto">
+                {data.intakes.slice(0, 4).map((intake, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-white/70 rounded-2xl backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200">
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold text-purple-900 mb-1">
+                        {intake.dish?.name || `Dish ${intake.dish_id}`}
+                      </div>
+                      <div className="text-xs text-purple-600 font-medium">
+                        {new Date(intake.intake_time).toLocaleTimeString('en-US', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </div>
+                    </div>
+                    <div className="text-sm font-bold text-purple-800 px-3 py-1 bg-purple-100 rounded-full">
+                      {Math.round(parseFloat(intake.dish?.calories || "0"))} kcal
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Calendar className="h-12 w-12 text-purple-400 mx-auto mb-4 opacity-50" />
+                <p className="text-base font-semibold text-purple-700 mb-2">No meals logged today</p>
+                <p className="text-sm text-purple-600">Start tracking your nutrition!</p>
+              </div>
             )}
           </CardContent>
         </Card>
 
+        {/* Quick Add - Enhanced */}
+        <Card className="lg:col-span-2 relative overflow-hidden bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 border-0 shadow-2xl backdrop-blur-sm rounded-3xl group hover:shadow-3xl transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-400/10 to-amber-600/10 opacity-60"></div>
+          <div className="absolute top-4 right-4">
+            <Utensils className="h-6 w-6 text-orange-400 animate-pulse" />
+          </div>
+          <CardHeader className="pb-4 relative z-10">
+            <CardTitle className="text-lg font-bold text-orange-900 flex items-center gap-3">
+              <Plus className="h-6 w-6" />
+              Quick Add
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6 relative z-10">
+            <div className="grid grid-cols-2 gap-4">
+              <Button 
+                variant="outline" 
+                className="h-20 flex flex-col items-center justify-center border-2 border-dashed border-orange-300 hover:border-orange-400 hover:bg-orange-50 rounded-2xl transition-all duration-200 group"
+              >
+                <Plus className="h-8 w-8 text-orange-600 mb-2 group-hover:scale-110 transition-transform duration-200" />
+                <span className="text-sm font-semibold text-orange-700">Add Meal</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-20 flex flex-col items-center justify-center border-2 border-dashed border-orange-300 hover:border-orange-400 hover:bg-orange-50 rounded-2xl transition-all duration-200 group"
+              >
+                <Plus className="h-8 w-8 text-orange-600 mb-2 group-hover:scale-110 transition-transform duration-200" />
+                <span className="text-sm font-semibold text-orange-700">Add Snack</span>
+              </Button>
+            </div>
+            <div className="text-center">
+              <LogIntakeDialog />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 rounded-xl font-semibold transition-all duration-200"
+              >
+                Search Recipes
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 rounded-xl font-semibold transition-all duration-200"
+              >
+                Scan Barcode
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
       </div>
-        {/* <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-emerald-500/20 dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg">
-          <FileUpload onChange={handleFileUpload} />
-        </div> */}
     </div>
   );
 }

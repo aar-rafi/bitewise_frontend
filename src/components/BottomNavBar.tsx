@@ -12,7 +12,7 @@ export default function BottomNavBar() {
   const navItems = [
     { path: "/dashboard", icon: Home, label: "Home" },
     { path: "/chat", icon: MessageSquare, label: "Chat" },
-    { path: "/chat-history", icon: History, label: "History" },
+    // { path: "/chat-history", icon: History, label: "History" },
     { path: "/stats", icon: LineChart, label: "Stats" },
     { path: "/profile", icon: User, label: "Profile" },
   ];

@@ -157,7 +157,7 @@ export function VoiceInputButton({
         className={cn(
           "flex-shrink-0 h-11 w-11 rounded-full border-0 transition-all duration-300 ease-out shadow-lg hover:shadow-2xl relative z-10 overflow-hidden",
           // Default state - Beautiful blue gradient
-          !isListening && "bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 hover:from-blue-600 hover:via-blue-700 hover:to-indigo-700 text-white",
+          !isListening && "bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-500 hover:from-blue-500 hover:via-blue-600 hover:to-indigo-600 text-white",
           // Recording state - Vibrant red gradient (no pulse animation)
           isListening && "bg-gradient-to-br from-red-500 via-red-600 to-pink-600 text-white",
           // Error states

@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useSendChatMessage, useSendChatWithImages } from "@/hooks/useChat";
 import { useToast } from "@/hooks/use-toast";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { VoiceInputButton } from "@/components/ui/VoiceInputButton";
 import { ImageUpload } from "./ImageUpload";
 import {
   Popover,
@@ -30,11 +32,25 @@ export function MessageInputWithImages({
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]); // Track blob URLs
   const [showImageUpload, setShowImageUpload] = useState(false);
+  const [baseMessage, setBaseMessage] = useState(""); // Store message without voice input
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
 
   const sendMessageMutation = useSendChatMessage();
   const sendImageMessageMutation = useSendChatWithImages();
+  
+  // Voice input functionality
+  const {
+    transcript,
+    isListening,
+    isSupported: isSpeechSupported,
+    audioLevel,
+    error: speechError,
+    startListening,
+    stopListening,
+    resetTranscript,
+    permissionStatus,
+  } = useSpeechRecognition();
 
   // Auto-resize textarea
   useEffect(() => {
@@ -45,6 +61,20 @@ export function MessageInputWithImages({
     }
   }, [message]);
 
+  // Update message when transcript changes (real-time transcription)
+  useEffect(() => {
+    if (isListening && transcript) {
+      // When listening, show base message + current transcript
+      setMessage(baseMessage + transcript);
+    } else if (!isListening && transcript) {
+      // When stopped listening, commit the transcript to base message
+      const newMessage = baseMessage + transcript;
+      setMessage(newMessage);
+      setBaseMessage(newMessage);
+      resetTranscript();
+    }
+  }, [transcript, baseMessage, isListening, resetTranscript]);
+
   // Cleanup blob URLs on unmount
   useEffect(() => {
     return () => {
@@ -52,8 +82,56 @@ export function MessageInputWithImages({
     };
   }, []);
 
+  // Handle voice input start
+  const handleVoiceStart = () => {
+    if (speechError) {
+      toast({
+        title: "Speech Recognition Error",
+        description: speechError,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Store current message as base (clean any previous transcript)
+    setBaseMessage(message);
+    resetTranscript();
+    startListening();
+    
+    // toast({
+    //   title: "Voice Input Started",
+    //   description: "Start speaking. Click the microphone again to stop.",
+    // });
+  };
+
+  // Handle voice input stop
+  const handleVoiceStop = () => {
+    stopListening();
+    
+    // toast({
+    //   title: "Voice Input Stopped",
+    //   description: "You can now edit your message before sending.",
+    // });
+  };
+
+  // Handle manual message changes (when user types)
+  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setMessage(newValue);
+    
+    // If not listening, update base message
+    if (!isListening) {
+      setBaseMessage(newValue);
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!message.trim() && selectedImages.length === 0) return;
+
+    // Stop voice input if active
+    if (isListening) {
+      stopListening();
+    }
 
     try {
       if (selectedImages.length > 0) {
@@ -65,6 +143,8 @@ export function MessageInputWithImages({
         });
 
         setMessage("");
+        setBaseMessage("");
+        resetTranscript();
         setSelectedImages([]);
         setShowImageUpload(false);
         
@@ -84,6 +164,8 @@ export function MessageInputWithImages({
         });
 
         setMessage("");
+        setBaseMessage("");
+        resetTranscript();
 
         if (onMessageSent) {
           onMessageSent(response.conversation_id);
@@ -218,16 +300,28 @@ export function MessageInputWithImages({
             </PopoverContent>
           </Popover>
 
+          {/* Voice Input Button */}
+          <VoiceInputButton
+            isListening={isListening}
+            isSupported={isSpeechSupported}
+            audioLevel={audioLevel}
+            onStart={handleVoiceStart}
+            onStop={handleVoiceStop}
+            disabled={disabled || isSending}
+            error={speechError}
+            permissionStatus={permissionStatus}
+          />
+
           {/* Text Input */}
           <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={handleMessageChange}
               onKeyDown={handleKeyDown}
               placeholder={selectedImages.length > 0 
                 ? "Describe what you'd like to know about these images..." 
-                : placeholder
+                : (isListening ? "Listening... Speak now or click the microphone to stop." : placeholder)
               }
               disabled={disabled || isSending}
               className="min-h-[44px] max-h-[120px] resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500"

@@ -39,6 +39,7 @@ import {
 import { Message } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
 import { DishSelectionWidget } from "./DishSelectionWidget";
+import { VideoSelectionWidget } from "./VideoSelectionWidget";
 import { MarkdownMessage } from "./MarkdownMessage";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { profileApi, UserProfile } from "@/lib/api";
@@ -302,7 +303,7 @@ function MessageBubble({ message }: { message: Message }) {
 
               {/* Message Content */}
               {/* Hide text content if there's a dish selection widget to avoid duplication */}
-              {!message.attachments?.widgets?.some(widget => widget.widget_type === "dish_selection") && (
+              {!message.attachments?.widgets?.some(widget => widget.widget_type === "dish_selection" || widget.widget_type === "video_selection") && (
                 <div className="whitespace-pre-wrap break-words">
                   {isThinking ? (
                     <div className="flex items-center space-x-2 text-sm font-medium py-1">
@@ -344,9 +345,14 @@ function MessageBubble({ message }: { message: Message }) {
 
               {message.attachments?.widgets && message.attachments.widgets.length > 0 && (
                 <div className="mt-2 space-y-2">
-                  {message.attachments.widgets.map((widget) => (
-                    <DishSelectionWidget key={widget.widget_id} widget={widget} />
-                  ))}
+                  {message.attachments.widgets.map((widget) => {
+                    if (widget.widget_type === "dish_selection") {
+                      return <DishSelectionWidget key={widget.widget_id} widget={widget as import("@/types/chat").DishSelectionWidget} />;
+                    } else if (widget.widget_type === "video_selection") {
+                      return <VideoSelectionWidget key={widget.widget_id} widget={widget as import("@/types/chat").VideoSelectionWidget} />;
+                    }
+                    return null;
+                  })}
                 </div>
               )}
 

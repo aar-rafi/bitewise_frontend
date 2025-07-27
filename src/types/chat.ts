@@ -29,7 +29,7 @@ export interface ImageAttachment {
 }
 
 // Widget types and schemas based on backend implementation
-export type WidgetType = "dish_selection" | "confirmation" | "info_card";
+export type WidgetType = "dish_selection" | "confirmation" | "info_card" | "video_selection";
 export type WidgetStatus = "pending" | "resolved" | "expired";
 
 export interface DishCard {
@@ -40,6 +40,16 @@ export interface DishCard {
     image_url?: string;
     calories?: number;  // Simplified to just basic calorie info
     servings?: number;
+}
+
+export interface VideoData {
+    video_id: string;
+    title: string;
+    description: string;
+    channel_title: string;
+    thumbnail_url: string;
+    video_url: string;
+    published_at?: string;
 }
 
 export interface DishSelectionWidget {
@@ -54,6 +64,15 @@ export interface DishSelectionWidget {
     resolved_at?: string;
 }
 
+export interface VideoSelectionWidget {
+    widget_id: string;
+    widget_type: "video_selection";
+    status: WidgetStatus;
+    videos: VideoData[];
+    query: string;
+    total_results?: number;
+}
+
 export interface ControlMessage {
     type: "dish_confirmation";
     widget_id: string;
@@ -65,7 +84,7 @@ export interface ControlMessage {
 export interface AttachmentData {
     files: AttachmentDataFile[];
     images?: ImageAttachment[];
-    widgets?: DishSelectionWidget[];
+    widgets?: (DishSelectionWidget | VideoSelectionWidget)[];
     tool_results?: unknown;
     control_message?: ControlMessage;
 }

@@ -144,7 +144,7 @@ export default function Dashboard() {
   }
 
   const CircularStat = ({ data, title, current, goal, unit, color }: {
-    data: any[];
+    data: { name: string; value: number; color: string }[];
     title: string;
     current: number;
     goal: number;
@@ -429,7 +429,9 @@ export default function Dashboard() {
           <CardContent className="space-y-4 relative z-10">
             {data?.intakes && data.intakes.length > 0 ? (
               <div className="space-y-3 max-h-80 overflow-y-auto">
-                {data.intakes.map((intake, index) => (
+                {data.intakes
+                  .sort((a, b) => new Date(b.intake_time).getTime() - new Date(a.intake_time).getTime())
+                  .map((intake, index) => (
                   <div key={index} className="flex items-center justify-between p-4 bg-white/70 rounded-2xl backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200">
                     <div className="flex-1">
                       <div className="text-sm font-semibold text-purple-900 mb-1">

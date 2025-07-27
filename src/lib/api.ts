@@ -13,6 +13,95 @@ const API_ENDPOINTS = {
 
 } as const;
 
+// General API client for making HTTP requests
+export const api = {
+    async get(endpoint: string, options?: RequestInit) {
+        const token = localStorage.getItem('access_token');
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+            ...options?.headers,
+        };
+
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'GET',
+            headers,
+            ...options,
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response;
+    },
+
+    async post(endpoint: string, data?: unknown, options?: RequestInit) {
+        const token = localStorage.getItem('access_token');
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+            ...options?.headers,
+        };
+
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'POST',
+            headers,
+            body: data ? JSON.stringify(data) : undefined,
+            ...options,
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response;
+    },
+
+    async put(endpoint: string, data?: unknown, options?: RequestInit) {
+        const token = localStorage.getItem('access_token');
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+            ...options?.headers,
+        };
+
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'PUT',
+            headers,
+            body: data ? JSON.stringify(data) : undefined,
+            ...options,
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response;
+    },
+
+    async delete(endpoint: string, options?: RequestInit) {
+        const token = localStorage.getItem('access_token');
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+            ...options?.headers,
+        };
+
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'DELETE',
+            headers,
+            ...options,
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response;
+    },
+};
+
 // Types for API requests and responses
 export interface RegisterRequest {
     email: string;
@@ -160,7 +249,8 @@ async function apiCall<T>(
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
 
-            if (response.status === 401 && !isRetry) {
+            // Don't try to refresh tokens for logout endpoint to prevent infinite loops
+            if (response.status === 401 && !isRetry && endpoint !== API_ENDPOINTS.LOGOUT) {
                 // Specific check for "Could not validate credentials" or general 401
                 const detailMessage = errorData.detail;
                 if (typeof detailMessage === 'string' && detailMessage === "Could not validate credentials" || response.statusText === "Unauthorized") {
@@ -180,20 +270,16 @@ async function apiCall<T>(
                             // Pass isRetry = true to prevent infinite loops
                             return await apiCall<T>(endpoint, newConfig, true);
                         } else {
-                            // No refresh token, clear tokens and navigate to login or throw error
-                            authApi.logout();
-                            // Optionally, redirect to login page here
-                            // window.location.href = '/login'; 
+                            // No refresh token, clear tokens but don't call logout API to prevent loops
+                            tokenStorage.clearTokens();
                             throw {
                                 message: "Session expired. Please log in again.",
                                 status: 401,
                             } as ApiError;
                         }
                     } catch (refreshError) {
-                        // Refresh failed, clear tokens and throw an error
-                        authApi.logout();
-                        // Optionally, redirect to login page here
-                        // window.location.href = '/login'; 
+                        // Refresh failed, clear tokens but don't call logout API to prevent loops
+                        tokenStorage.clearTokens();
                         const typedRefreshError = refreshError as ApiError;
                         throw {
                             message: typedRefreshError.message || "Failed to refresh session. Please log in again.",
@@ -202,7 +288,6 @@ async function apiCall<T>(
                     }
                 }
             }
-
 
             const apiError: ApiError = {
                 message: errorData.detail?.[0]?.msg || (typeof errorData.detail === 'string' ? errorData.detail : `HTTP ${response.status}: ${response.statusText}`),
@@ -235,7 +320,6 @@ async function apiCall<T>(
                 status: 0, // Or some other status code to indicate a client-side parsing issue
             } as ApiError;
         }
-
 
         // Handle network errors or other unexpected errors
         throw {
@@ -344,10 +428,17 @@ export const authApi = {
 
     logout: async () => {
         try {
-            // Call backend to invalidate refresh tokens
-            await apiCall<{ message: string }>(API_ENDPOINTS.LOGOUT, {
-                method: "POST",
-            });
+            // Call backend to invalidate refresh tokens - but don't use apiCall to avoid infinite loops
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                await fetch(`${API_BASE_URL}${API_ENDPOINTS.LOGOUT}`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+            }
         } catch (error) {
             // Even if backend call fails, we should still clear local tokens
             console.error("Error during logout API call:", error);
@@ -551,8 +642,226 @@ export const profileApi = {
     },
 };
 
+// Dishes API types
+export interface DishListItem {
+    id: number;
+    name: string;
+    description?: string;
+    cuisine?: string;
+    prep_time_minutes?: number;
+    cook_time_minutes?: number;
+    servings?: number;
+    image_urls?: string[];
+    calories?: number;
+    protein_g?: number;
+    carbs_g?: number;
+    fats_g?: number;
+    created_at: string;
+}
+
+export interface DishListResponse {
+    dishes: DishListItem[];
+    total_count: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+}
+
+export interface DishResponse extends DishListItem {
+    created_by_user_id?: number;
+    updated_at: string;
+    cooking_steps?: string[];
+    // Full nutritional information
+    sat_fats_g?: number;
+    unsat_fats_g?: number;
+    trans_fats_g?: number;
+    fiber_g?: number;
+    sugar_g?: number;
+    calcium_mg?: number;
+    iron_mg?: number;
+    potassium_mg?: number;
+    sodium_mg?: number;
+    zinc_mg?: number;
+    magnesium_mg?: number;
+    vit_a_mcg?: number;
+    vit_b1_mg?: number;
+    vit_b2_mg?: number;
+    vit_b3_mg?: number;
+    vit_b5_mg?: number;
+    vit_b6_mg?: number;
+    vit_b9_mcg?: number;
+    vit_b12_mcg?: number;
+    vit_c_mg?: number;
+    vit_d_mcg?: number;
+    vit_e_mg?: number;
+    vit_k_mcg?: number;
+}
+
+// Ingredients API types
+export interface IngredientListItem {
+    id: number;
+    name: string;
+    serving_size: number;
+    image_url?: string;
+    calories?: number;
+    protein_g?: number;
+    carbs_g?: number;
+    fats_g?: number;
+}
+
+export interface IngredientListResponse {
+    ingredients: IngredientListItem[];
+    total_count: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+}
+
+export interface IngredientResponse extends IngredientListItem {
+    created_at: string;
+    // Full nutritional information
+    sat_fats_g?: number;
+    unsat_fats_g?: number;
+    trans_fats_g?: number;
+    fiber_g?: number;
+    sugar_g?: number;
+    calcium_mg?: number;
+    iron_mg?: number;
+    potassium_mg?: number;
+    sodium_mg?: number;
+    zinc_mg?: number;
+    magnesium_mg?: number;
+    vit_a_mcg?: number;
+    vit_b1_mg?: number;
+    vit_b2_mg?: number;
+    vit_b3_mg?: number;
+    vit_b5_mg?: number;
+    vit_b6_mg?: number;
+    vit_b9_mcg?: number;
+    vit_b12_mcg?: number;
+    vit_c_mg?: number;
+    vit_d_mcg?: number;
+    vit_e_mg?: number;
+    vit_k_mcg?: number;
+}
+
+export interface DishIngredientResponse {
+    ingredient: IngredientResponse;
+    quantity: number;
+}
+
+// Dishes API
+export const dishesApi = {
+    getAll: async (params?: {
+        search?: string;
+        cuisine?: string;
+        page?: number;
+        page_size?: number;
+    }): Promise<DishListResponse> => {
+        const searchParams = new URLSearchParams();
+        if (params?.search) searchParams.append("search", params.search);
+        if (params?.cuisine) searchParams.append("cuisine", params.cuisine);
+        if (params?.page) searchParams.append("page", params.page.toString());
+        if (params?.page_size) searchParams.append("page_size", params.page_size.toString());
+        
+        const queryString = searchParams.toString();
+        const endpoint = `/api/v1/dishes${queryString ? `?${queryString}` : ''}`;
+        
+        return apiCall<DishListResponse>(endpoint, { method: "GET" });
+    },
+
+    getById: async (dishId: number): Promise<DishResponse> => {
+        return apiCall<DishResponse>(`/api/v1/dishes/${dishId}`, { method: "GET" });
+    },
+
+    getIngredients: async (dishId: number): Promise<DishIngredientResponse[]> => {
+        return apiCall<DishIngredientResponse[]>(`/api/v1/dishes/${dishId}/ingredients`, { method: "GET" });
+    },
+
+    searchByName: async (params: {
+        q: string;
+        page?: number;
+        page_size?: number;
+    }): Promise<DishListResponse> => {
+        const searchParams = new URLSearchParams();
+        searchParams.append("q", params.q);
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.page_size) searchParams.append("page_size", params.page_size.toString());
+        
+        return apiCall<DishListResponse>(`/api/v1/dishes/search?${searchParams.toString()}`, { method: "GET" });
+    },
+
+    getByCuisine: async (params: {
+        cuisine: string;
+        page?: number;
+        page_size?: number;
+    }): Promise<DishListResponse> => {
+        const searchParams = new URLSearchParams();
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.page_size) searchParams.append("page_size", params.page_size.toString());
+        
+        const queryString = searchParams.toString();
+        const endpoint = `/api/v1/dishes/cuisine/${params.cuisine}${queryString ? `?${queryString}` : ''}`;
+        
+        return apiCall<DishListResponse>(endpoint, { method: "GET" });
+    },
+};
+
+// Ingredients API
+export const ingredientsApi = {
+    getAll: async (params?: {
+        search?: string;
+        page?: number;
+        page_size?: number;
+    }): Promise<IngredientListResponse> => {
+        const searchParams = new URLSearchParams();
+        if (params?.search) searchParams.append("search", params.search);
+        if (params?.page) searchParams.append("page", params.page.toString());
+        if (params?.page_size) searchParams.append("page_size", params.page_size.toString());
+        
+        const queryString = searchParams.toString();
+        const endpoint = `/api/v1/ingredients${queryString ? `?${queryString}` : ''}`;
+        
+        return apiCall<IngredientListResponse>(endpoint, { method: "GET" });
+    },
+
+    getById: async (ingredientId: number): Promise<IngredientResponse> => {
+        return apiCall<IngredientResponse>(`/api/v1/ingredients/${ingredientId}`, { method: "GET" });
+    },
+
+    getDishes: async (params: {
+        ingredientId: number;
+        page?: number;
+        page_size?: number;
+    }): Promise<DishListResponse> => {
+        const searchParams = new URLSearchParams();
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.page_size) searchParams.append("page_size", params.page_size.toString());
+        
+        const queryString = searchParams.toString();
+        const endpoint = `/api/v1/ingredients/${params.ingredientId}/dishes${queryString ? `?${queryString}` : ''}`;
+        
+        return apiCall<DishListResponse>(endpoint, { method: "GET" });
+    },
+
+    searchByName: async (params: {
+        q: string;
+        page?: number;
+        page_size?: number;
+    }): Promise<IngredientListResponse> => {
+        const searchParams = new URLSearchParams();
+        searchParams.append("q", params.q);
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.page_size) searchParams.append("page_size", params.page_size.toString());
+        
+        return apiCall<IngredientListResponse>(`/api/v1/ingredients/search?${searchParams.toString()}`, { method: "GET" });
+    },
+};
+
 export default {
     authApi,
     intakesApi,
     profileApi,
+    dishesApi,
+    ingredientsApi,
 };

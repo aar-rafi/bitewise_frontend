@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, MessageSquare, LineChart, BarChart, User, ChevronDown, History } from "lucide-react";
+import { Home, MessageSquare, LineChart, BarChart, User, ChevronDown, History, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +11,7 @@ export default function BottomNavBar() {
 
   const navItems = [
     { path: "/dashboard", icon: Home, label: "Home" },
+    { path: "/explore", icon: Search, label: "Explore" },
     { path: "/chat", icon: MessageSquare, label: "Chat" },
     // { path: "/chat-history", icon: History, label: "History" },
     { path: "/stats", icon: LineChart, label: "Stats" },

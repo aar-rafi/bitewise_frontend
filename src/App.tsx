@@ -17,6 +17,9 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Chat = lazy(() => import("./pages/Chat"));
 const ChatHistory = lazy(() => import("./pages/ChatHistory"));
+const Explore = lazy(() => import("./pages/Explore"));
+const DishDetail = lazy(() => import("./pages/DishDetail"));
+const IngredientDetail = lazy(() => import("./pages/IngredientDetail"));
 const Stats = lazy(() => import("./pages/Stats"));
 const Profile = lazy(() => import("./pages/Profile"));
 const ProfileUpdate = lazy(() => import("./pages/ProfileUpdate"));
@@ -132,6 +135,36 @@ const App = () => {
                       element={
                         <ProtectedRoute>
                           <ChatHistory />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    {/* Explore route - protected route requiring authentication */}
+                    <Route 
+                      path="/explore" 
+                      element={
+                        <ProtectedRoute>
+                          <Explore />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    {/* Dish Detail route - protected route requiring authentication */}
+                    <Route 
+                      path="/dishes/:dishId" 
+                      element={
+                        <ProtectedRoute>
+                          <DishDetail />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    {/* Ingredient Detail route - protected route requiring authentication */}
+                    <Route 
+                      path="/ingredients/:ingredientId" 
+                      element={
+                        <ProtectedRoute>
+                          <IngredientDetail />
                         </ProtectedRoute>
                       } 
                     />

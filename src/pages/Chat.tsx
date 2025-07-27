@@ -59,8 +59,8 @@ const useSmartNavbar = () => {
 // Loading component for chat interface
 const ChatLoader = () => (
   <div className="h-screen flex">
-    {/* Sidebar skeleton */}
-    <div className="w-72 border-r bg-muted/20 p-4 space-y-4">
+    {/* Sidebar skeleton - Hidden on mobile, visible on desktop (matches ChatInterface) */}
+    <div className="hidden md:flex w-72 border-r bg-muted/20 p-4 space-y-4">
       <div className="space-y-2">
         <Skeleton className="h-6 w-32" />
         <Skeleton className="h-4 w-24" />
@@ -77,20 +77,45 @@ const ChatLoader = () => (
     
     {/* Main chat area skeleton */}
     <div className="flex-1 flex flex-col">
+      {/* Header skeleton */}
       <div className="border-b p-4">
-        <Skeleton className="h-6 w-48" />
-        <Skeleton className="h-4 w-32 mt-2" />
-      </div>
-      <div className="flex-1 p-4 space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className={`flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}>
-            <div className="max-w-[70%] space-y-2">
-              <Skeleton className="h-8 w-8 rounded-full" />
-              <Skeleton className="h-16 w-full rounded-lg" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            {/* Mobile hamburger skeleton */}
+            <div className="md:hidden">
+              <Skeleton className="h-6 w-6" />
+            </div>
+            <div>
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-32 mt-2" />
             </div>
           </div>
-        ))}
+          <div className="flex space-x-2">
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-8" />
+          </div>
+        </div>
       </div>
+      
+      {/* Messages area skeleton - matches MessageList exactly */}
+      <div className="flex-1 p-4">
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className={`flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}>
+              <div className={`flex items-start space-x-2 max-w-[70%] ${
+                i % 2 === 0 ? "" : "flex-row-reverse space-x-reverse"
+              }`}>
+                <Skeleton className="h-8 w-8 rounded-full flex-shrink-0" />
+                <div className="space-y-2">
+                  <Skeleton className="h-16 w-64 rounded-lg" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* Input area skeleton */}
       <div className="p-4">
         <Skeleton className="h-12 w-full rounded-lg" />
       </div>

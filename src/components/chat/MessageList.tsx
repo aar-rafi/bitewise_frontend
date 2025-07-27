@@ -40,6 +40,8 @@ import { Message } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
 import { DishSelectionWidget } from "./DishSelectionWidget";
 import { MarkdownMessage } from "./MarkdownMessage";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { profileApi, UserProfile } from "@/lib/api";
 
 interface MessageListProps {
   conversationId: number;
@@ -221,6 +223,20 @@ function MessageBubble({ message }: { message: Message }) {
     }
   };
 
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  // Fetch user profile for profile picture (only for user messages)
+  useEffect(() => {
+    if (message.is_user_message) {
+      profileApi.getMe()
+        .then(setUserProfile)
+        .catch((error) => {
+          console.error('Failed to fetch user profile for avatar:', error);
+          // Don't show error to user since this is just for avatar display
+        });
+    }
+  }, [message.is_user_message]);
+
   const isUser = message.is_user_message;
   const isThinking = message.status === "thinking";
   const isPending = message.status === "pending";
@@ -259,13 +275,21 @@ function MessageBubble({ message }: { message: Message }) {
           isUser ? "flex-row-reverse space-x-reverse" : ""
         }`}
       >
-        <div
-          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-            isUser ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600"
-          }`}
-        >
-          {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-        </div>
+        {/* User/AI Avatar */}
+        {isUser ? (
+          <Avatar className="w-8 h-8 flex-shrink-0">
+            {userProfile?.profile_image_url && (
+              <AvatarImage src={userProfile.profile_image_url} alt="User" />
+            )}
+            <AvatarFallback className="bg-blue-500 text-white">
+              <User className="h-4 w-4" />
+            </AvatarFallback>
+          </Avatar>
+        ) : (
+          <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-600">
+            <Bot className="h-4 w-4" />
+          </div>
+        )}
 
         <div className={`${pendingUserMessageClasses}`}>
           {" "}
@@ -343,16 +367,6 @@ export function MessageList({ conversationId }: MessageListProps) {
     error,
   } = useMessages(conversationId);
 
-  const [showMessages, setShowMessages] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowMessages(true);
-    }, 50);
-
-    return () => clearTimeout(timer);
-  }, [messagesResponse]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -361,20 +375,25 @@ export function MessageList({ conversationId }: MessageListProps) {
     scrollToBottom();
   }, [messagesResponse?.messages]);
 
-  if (isLoading || !showMessages) {
+  // Simplified loading state - no artificial delay
+  if (isLoading) {
     return (
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
+          {[...Array(3)].map((_, i) => (
             <div
               key={i}
               className={`flex ${
-                i % 2 === 0 ? "justify-end" : "justify-start"
+                i % 2 === 0 ? "justify-start" : "justify-end"
               }`}
             >
-              <div className="flex items-start space-x-2 max-w-[80%]">
-                <Skeleton className="h-8 w-8 rounded-full" />
-                <Skeleton className="h-16 w-64" />
+              <div className={`flex items-start space-x-2 max-w-[70%] ${
+                i % 2 === 0 ? "" : "flex-row-reverse space-x-reverse"
+              }`}>
+                <Skeleton className="h-8 w-8 rounded-full flex-shrink-0" />
+                <div className="space-y-2">
+                  <Skeleton className="h-16 w-64 rounded-lg" />
+                </div>
               </div>
             </div>
           ))}

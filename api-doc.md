@@ -1,4 +1,4 @@
-## POST /api/v1/chat/conversations
+## POST /api/v1/chat/conversations 
 Create Conversation
 Request body
 Schema

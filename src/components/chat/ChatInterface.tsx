@@ -1,23 +1,17 @@
 import { useState, useEffect } from "react";
-import { MessageCircle, Settings, BarChart3 } from "lucide-react";
+import { MessageCircle, Menu, X, ChartArea, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { ConversationList, ConversationListMobileTrigger } from "./ConversationList";
+import { ConversationList } from "./ConversationList";
 import { MessageList } from "./MessageList";
 import { MessageInputWithImages } from "./MessageInputWithImages";
+import { ChatHeader } from "./ChatHeader";
 import {
   useConversation,
-  useConversationSummary,
   useMarkMessagesAsRead,
 } from "@/hooks/useChat";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface ChatInterfaceProps {
   className?: string;
@@ -27,14 +21,9 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
   const [selectedConversationId, setSelectedConversationId] = useState<
     number | undefined
   >();
-  const [showSummary, setShowSummary] = useState(false);
-  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const { data: conversation } = useConversation(selectedConversationId!);
-  const { data: summary } = useConversationSummary(
-    selectedConversationId!,
-    undefined
-  );
   const markAsReadMutation = useMarkMessagesAsRead();
 
   // Mark messages as read when conversation is selected
@@ -47,6 +36,7 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
 
   const handleConversationSelect = (conversationId: number) => {
     setSelectedConversationId(conversationId);
+    setIsHistoryOpen(false); // Close history when selecting conversation
   };
 
   const handleMessageSent = (conversationId: number) => {
@@ -57,182 +47,146 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
   };
 
   return (
-    <div className={`flex h-full bg-background ${className}`}>
-      {/* Sidebar - Conversation List (Desktop only) */}
-      <div className="hidden md:flex w-72 border-r bg-muted/20 flex-col">
-        <div className="flex-1 overflow-y-auto">
-          <div className="h-full p-4">
-            <ConversationList
-              selectedConversationId={selectedConversationId}
-              onSelectConversation={handleConversationSelect}
-              showMobileSheet={false}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Sheet for Conversation List */}
-      <ConversationList
-        selectedConversationId={selectedConversationId}
-        onSelectConversation={handleConversationSelect}
-        showMobileSheet={true}
-        isMobileSheetOpen={isMobileSheetOpen}
-        onMobileSheetOpenChange={setIsMobileSheetOpen}
-      />
-
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {selectedConversationId && conversation ? (
+    <div className={`relative h-full bg-background ${className}`}>
+      {/* Animated History Sidebar */}
+      <AnimatePresence>
+        {isHistoryOpen && (
           <>
-            {/* Chat Header */}
-            <div className="border-b p-4 bg-background">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  {/* Hamburger menu for mobile */}
-                  <ConversationListMobileTrigger
-                    onOpenSheet={() => setIsMobileSheetOpen(true)}
-                  />
-                  <div>
-                    <h2 className="font-semibold text-lg truncate max-w-[300px]">
-                      {conversation.title}
-                    </h2>
-                    {/* <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                      <Badge
-                        variant={
-                          conversation.status === "active"
-                            ? "default"
-                            : "secondary"
-                        }
-                        className="text-xs"
-                      >
-                        {conversation.status}
-                      </Badge>
-                    </div> */}
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Dialog open={showSummary} onOpenChange={setShowSummary}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <BarChart3 className="h-4 w-4 mr-2" />
-                        Summary
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Conversation Summary</DialogTitle>
-                      </DialogHeader>
-                      {summary ? (
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-medium mb-2">Summary</h4>
-                            <p className="text-sm text-muted-foreground">
-                              {summary.summary}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h4 className="font-medium mb-2">Key Topics</h4>
-                            <div className="flex flex-wrap gap-1">
-                              {summary.key_topics.map((topic, index) => (
-                                <Badge key={index} variant="secondary">
-                                  {topic}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="font-medium">Messages:</span>{" "}
-                              {summary.message_count}
-                            </div>
-                            <div>
-                              <span className="font-medium">
-                                Conversation ID:
-                              </span>{" "}
-                              {summary.conversation_id}
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-center text-muted-foreground py-8">
-                          <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                          <p>No summary available</p>
-                          <p className="text-sm">
-                            Summary will be generated based on conversation
-                            content
-                          </p>
-                        </div>
-                      )}
-                    </DialogContent>
-                  </Dialog>
-
-                  <Button variant="outline" size="sm">
-                    <Settings className="h-4 w-4" />
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+              onClick={() => setIsHistoryOpen(false)}
+            />
+            
+            {/* History Panel */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed left-0 top-0 h-full w-80 bg-background backdrop-blur-sm border-r border-border/50 z-50 shadow-2xl"
+            >
+                               <div className="h-full p-4 overflow-y-auto">
+                 <div className="flex items-center justify-between mb-6">
+                   <h2 className="text-lg font-semibold text-foreground">Chat History</h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsHistoryOpen(false)}
+                    className="h-8 w-8 p-0 hover:bg-nutrition-green/10"
+                  >
+                    <X className="h-4 w-4" />
                   </Button>
                 </div>
+                <ConversationList
+                  selectedConversationId={selectedConversationId}
+                  onSelectConversation={handleConversationSelect}
+                  showMobileSheet={false}
+                />
               </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Main Chat Container */}
+      <div className="h-full flex flex-col w-[80%] mx-auto">
+        {/* Sticky Floating Header */}
+        <ChatHeader />
+        
+        {selectedConversationId && conversation ? (
+          <>
+            {/* Clean Chat Messages Container */}
+            <div className="flex-1 overflow-hidden bg-background">
+              <MessageList conversationId={selectedConversationId} />
             </div>
 
-            {/* Messages Area */}
-            <MessageList conversationId={selectedConversationId} />
-
-            {/* Message Input with Image Support */}
-            <div className="pb-4">
+            {/* Message Input Area */}
+            <div className="px-4 pt-4 pb-8 bg-background border-t border-border/30">
               <MessageInputWithImages
                 conversationId={selectedConversationId}
                 onMessageSent={handleMessageSent}
-                placeholder={`Message ${conversation.title}...`}
+                placeholder="Type your message..."
               />
             </div>
           </>
         ) : (
           <>
-            {/* Header for welcome screen with hamburger menu */}
-            <div className="border-b p-4 bg-background md:hidden">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <ConversationListMobileTrigger
-                    onOpenSheet={() => setIsMobileSheetOpen(true)}
-                  />
-                  <h2 className="font-semibold text-lg">Chat</h2>
+            {/* Welcome Screen */}
+            <div className="flex-1 flex items-center justify-center p-8 bg-background">
+              <div className="text-center max-w-2xl w-full">
+                <div className="w-24 h-24 bg-nutrition-green rounded-full flex items-center justify-center mx-auto mb-6">
+                  <MessageCircle className="h-12 w-12 text-white" />
+                </div>
+                <h1 className="text-3xl font-bold mb-4 text-foreground">
+                  Welcome to Chat
+                </h1>
+                <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
+                  Start a conversation, upload images for analysis, or explore your nutrition journey with our AI assistant
+                </p>
+
+                <div className="grid md:grid-cols-3 gap-4 mb-8">
+                  <Card className="text-center border-primary/20 hover:border-primary/40 transition-colors">
+                    <CardContent className="p-6">
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <MessageCircle className="h-5 w-5 text-primary" />
+                      </div>
+                      <h3 className="font-semibold mb-2">Chat</h3>
+                      <p className="text-sm text-muted-foreground">Start conversations with our AI assistant</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="text-center border-primary/20 hover:border-primary/40 transition-colors">
+                    <CardContent className="p-6">
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <Utensils />
+                      </div>
+                      <h3 className="font-semibold mb-2">Food Analysis</h3>
+                      <p className="text-sm text-muted-foreground">Upload food images for nutritional insights</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="text-center border-primary/20 hover:border-primary/40 transition-colors">
+                    <CardContent className="p-6">
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <ChartArea />
+                      </div>
+                      <h3 className="font-semibold mb-2">Nutrition Tracking</h3>
+                      <p className="text-sm text-muted-foreground">Get personalized nutrition recommendations</p>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
             </div>
 
-            {/* Welcome Screen */}
-            <div className="flex-1 flex items-center justify-center p-6">
-            <div className="text-center max-w-md">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageCircle className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <h2 className="text-xl font-semibold mb-2">
-                Welcome to Chat
-              </h2>
-              <p className="text-muted-foreground mb-4 text-sm">
-                Start a conversation or upload images for analysis
-              </p>
-
-              <Card className="text-left mb-4">
-                <CardContent className="p-4 space-y-1 text-sm">
-                  <p>• Create new conversations</p>
-                  <p>• Send text messages and images</p>
-                  <p>• Get AI analysis and insights</p>
-                </CardContent>
-              </Card>
-
-              {/* Start New Conversation */}
+            {/* Message Input for Welcome Screen */}
+            <div className="px-4 pt-4 pb-8 bg-background border-t border-border/30">
               <MessageInputWithImages
                 onMessageSent={handleMessageSent}
-                placeholder="Start a new conversation..."
+                placeholder="Ask me about nutrition, upload a food image, or start a conversation..."
               />
             </div>
-          </div>
           </>
         )}
       </div>
+
+      {/* Pocket Menu Button - Bottom Left */}
+      <motion.div
+        className="fixed bottom-6 left-6 z-30"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <Button
+          onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+          className="h-12 w-12 rounded-full bg-nutrition-green hover:bg-nutrition-emerald shadow-lg border-0 text-white"
+          size="sm"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+      </motion.div>
     </div>
   );
 }

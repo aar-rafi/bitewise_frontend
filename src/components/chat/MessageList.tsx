@@ -258,16 +258,16 @@ function MessageBubble({ message }: { message: Message }) {
   // Base card classes
   let cardBaseClasses = "";
   if (isUser && !isThinking) {
-    cardBaseClasses = "bg-blue-50 border border-blue-200 text-gray-900";
+    cardBaseClasses = "bg-nutrition-green/5 border border-nutrition-green/20 text-foreground";
   } else {
-    cardBaseClasses = "bg-white border border-gray-200 text-gray-900";
+    cardBaseClasses = "bg-background border border-border text-foreground";
   }
 
   // Conditional classes for animations and styling
   const pendingUserMessageClasses =
     isUser && isPending ? "animate-pulse-border rounded-lg" : ""; // For pulsing border
   const thinkingAiMessageClasses =
-    !isUser && isThinking ? "border-blue-500 border-dashed" : "";
+    !isUser && isThinking ? "border-nutrition-green border-dashed" : "";
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}>
@@ -282,12 +282,12 @@ function MessageBubble({ message }: { message: Message }) {
             {userProfile?.profile_image_url && (
               <AvatarImage src={userProfile.profile_image_url} alt="User" />
             )}
-            <AvatarFallback className="bg-blue-500 text-white">
+            <AvatarFallback className="bg-nutrition-green text-white">
               <User className="h-4 w-4" />
             </AvatarFallback>
           </Avatar>
         ) : (
-          <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-600">
+          <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-muted text-muted-foreground">
             <Bot className="h-4 w-4" />
           </div>
         )}
@@ -450,8 +450,8 @@ export function MessageList({ conversationId }: MessageListProps) {
   }
 
   return (
-    <ScrollArea className="flex-1 p-4">
-      <div className="space-y-4">
+    <ScrollArea className="flex-1 h-full">
+      <div className="space-y-4 p-4 min-h-full">
         {messagesToRender.map((message) => (
           <MessageBubble key={message.id} message={message} />
         ))}

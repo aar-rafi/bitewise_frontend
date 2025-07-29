@@ -1,7 +1,10 @@
-export { ChatInterface } from './ChatInterface';
-export { ConversationList } from './ConversationList';
-export { MessageList } from './MessageList';
-export { MessageInput } from './MessageInput';
-export { MessageInputWithImages } from './MessageInputWithImages';
-export { DishSelectionWidget } from './DishSelectionWidget';
-export { ImageUpload } from './ImageUpload'; 
+export { ChatInterface } from "./ChatInterface";
+export { ConversationList, ConversationListMobileTrigger } from "./ConversationList";
+export { MessageList } from "./MessageList";
+export { MessageInput } from "./MessageInput";
+export { MessageInputWithImages } from "./MessageInputWithImages";
+export { ChatHeader } from "./ChatHeader";
+export { DishSelectionWidget } from "./DishSelectionWidget";
+export { VideoSelectionWidget } from "./VideoSelectionWidget";
+export { MarkdownMessage } from "./MarkdownMessage";
+export { ImageUpload } from "./ImageUpload"; 

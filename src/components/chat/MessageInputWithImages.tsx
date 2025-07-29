@@ -223,16 +223,16 @@ export function MessageInputWithImages({
   const canSend = (message.trim() || selectedImages.length > 0) && !isSending;
 
   return (
-    <div className="border-t bg-white shadow-sm">
+    <div className="bg-background rounded-xl shadow-sm border border-border/30">
       {/* Image Preview Bar - shown when images are selected */}
       {selectedImages.length > 0 && (
-        <div className="border-b border-gray-200 p-4 bg-blue-50/50">
+        <div className="border-b border-border/30 p-4 bg-nutrition-green/5">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-blue-100 rounded-md">
-                <ImageIcon className="h-4 w-4 text-blue-600" />
+              <div className="p-1.5 bg-nutrition-green/10 rounded-md">
+                <ImageIcon className="h-4 w-4 text-nutrition-green" />
               </div>
-              <span className="text-sm font-semibold text-gray-900">
+              <span className="text-sm font-semibold text-foreground">
                 {selectedImages.length} image{selectedImages.length !== 1 ? 's' : ''} attached
               </span>
             </div>
@@ -241,7 +241,7 @@ export function MessageInputWithImages({
               size="sm"
               onClick={removeAllImages}
               disabled={isSending}
-              className="ml-auto h-7 px-3 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              className="ml-auto h-7 px-3 text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <X className="h-3 w-3 mr-1" />
               Remove All
@@ -254,7 +254,7 @@ export function MessageInputWithImages({
                 <img
                   src={imagePreviews[index]}
                   alt={`Preview ${index + 1}`}
-                  className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+                  className="w-20 h-20 object-cover rounded-lg border border-border shadow-sm"
                 />
                 <Button
                   variant="destructive"
@@ -286,7 +286,7 @@ export function MessageInputWithImages({
                 variant="outline"
                 size="sm"
                 disabled={disabled || isSending}
-                className="h-10 px-3 border-gray-300 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                className="h-10 px-3 border-border hover:border-nutrition-green hover:text-nutrition-green transition-colors"
                 title="Attach images"
               >
                 <ImageIcon className="h-4 w-4" />
@@ -324,7 +324,7 @@ export function MessageInputWithImages({
                 : (isListening ? "Listening... Speak now or click the microphone to stop." : placeholder)
               }
               disabled={disabled || isSending}
-              className="min-h-[44px] max-h-[120px] resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+              className="min-h-[44px] max-h-[120px] resize-none border-border focus:border-nutrition-green focus:ring-nutrition-green/20"
               rows={1}
             />
           </div>
@@ -333,7 +333,7 @@ export function MessageInputWithImages({
           <Button
             onClick={handleSendMessage}
             disabled={!canSend || disabled}
-            className="h-10 px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+            className="h-10 px-6 bg-nutrition-green hover:bg-nutrition-emerald text-white font-medium border-0"
           >
             {isSending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -344,24 +344,24 @@ export function MessageInputWithImages({
         </div>
 
         {/* Help Text - Now with better readability */}
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600 font-medium">
+        <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/30">
+          {/* <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground font-medium">
               Press Enter to send, Shift+Enter for new line
             </span>
             {message.length > 0 && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground/60">
                 {message.length} characters
               </span>
             )}
-          </div>
+          </div> */}
           
           {selectedImages.length > 0 && (
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+              <Badge variant="secondary" className="bg-nutrition-green/10 text-nutrition-green border-nutrition-green/20">
                 {selectedImages.length} image{selectedImages.length !== 1 ? 's' : ''}
               </Badge>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground/60">
                 {(selectedImages.reduce((sum, file) => sum + file.size, 0) / (1024 * 1024)).toFixed(2)} MB
               </span>
             </div>

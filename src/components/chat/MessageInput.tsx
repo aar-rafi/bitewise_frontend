@@ -292,8 +292,8 @@ export function MessageInput({
         </div>
 
         {/* Help Text - Now with better readability */}
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between mt-3 pt-2">
+          {/* <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600 font-medium">
               Press Enter to send, Shift+Enter for new line
             </span>
@@ -302,7 +302,7 @@ export function MessageInput({
                 {message.length} characters
               </span>
             )}
-          </div>
+          </div> */}
           
           {attachments.length > 0 && (
             <div className="flex items-center gap-2">

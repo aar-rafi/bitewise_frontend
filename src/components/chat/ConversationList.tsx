@@ -144,7 +144,7 @@ export function ConversationList({
         <h2 className="text-base font-semibold">Conversations</h2>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" className="h-8 w-8 p-0">
+            <Button size="sm" className="h-8 w-8 p-0 bg-nutrition-green hover:bg-nutrition-emerald text-white border-0">
               <Plus className="h-4 w-4" />
             </Button>
           </DialogTrigger>
@@ -179,6 +179,7 @@ export function ConversationList({
                   disabled={
                     createConversation.isPending || !newConversationTitle.trim()
                   }
+                  className="bg-nutrition-green hover:bg-nutrition-emerald text-white border-0"
                 >
                   {createConversation.isPending ? "Creating..." : "Create"}
                 </Button>
@@ -192,9 +193,9 @@ export function ConversationList({
         {conversations.map((conversation) => (
           <Card
             key={conversation.id}
-            className={`cursor-pointer transition-colors hover:bg-muted/50 ${
+            className={`cursor-pointer transition-colors hover:bg-muted/50 border-border/50 ${
               selectedConversationId === conversation.id
-                ? "bg-muted border-primary"
+                ? "bg-nutrition-green/10 border-nutrition-green/30"
                 : ""
             }`}
             onClick={() => handleSelectConversation(conversation.id)}
@@ -354,12 +355,13 @@ export function ConversationList({
               >
                 Cancel
               </Button>
-              <Button
-                onClick={handleUpdateConversation}
-                disabled={updateConversation.isPending || !editTitle.trim()}
-              >
-                {updateConversation.isPending ? "Saving..." : "Save"}
-              </Button>
+                              <Button
+                  onClick={handleUpdateConversation}
+                  disabled={updateConversation.isPending || !editTitle.trim()}
+                  className="bg-nutrition-green hover:bg-nutrition-emerald text-white border-0"
+                >
+                  {updateConversation.isPending ? "Saving..." : "Save"}
+                </Button>
             </div>
           </div>
         </DialogContent>

@@ -785,6 +785,56 @@ export interface DishIngredientResponse {
     quantity: number;
 }
 
+export interface DishIngredientCreate {
+    ingredient_id: number;
+    quantity: number;
+}
+
+export interface DishCreateRequest {
+    name: string;
+    description?: string;
+    cuisine?: string;
+    cooking_steps?: string[];
+    prep_time_minutes?: number;
+    cook_time_minutes?: number;
+    image_urls?: string[];
+    servings?: number;
+    calories?: number;
+    protein_g?: number;
+    carbs_g?: number;
+    fats_g?: number;
+    sat_fats_g?: number;
+    unsat_fats_g?: number;
+    trans_fats_g?: number;
+    fiber_g?: number;
+    sugar_g?: number;
+    calcium_mg?: number;
+    iron_mg?: number;
+    potassium_mg?: number;
+    sodium_mg?: number;
+    zinc_mg?: number;
+    magnesium_mg?: number;
+    vit_a_mcg?: number;
+    vit_b1_mg?: number;
+    vit_b2_mg?: number;
+    vit_b3_mg?: number;
+    vit_b5_mg?: number;
+    vit_b6_mg?: number;
+    vit_b9_mcg?: number;
+    vit_b12_mcg?: number;
+    vit_c_mg?: number;
+    vit_d_mcg?: number;
+    vit_e_mg?: number;
+    vit_k_mcg?: number;
+    ingredients?: DishIngredientCreate[];
+}
+
+export interface ImageUploadResponse {
+    success: boolean;
+    image_url: string;
+    metadata: any;
+}
+
 // Dishes API
 export const dishesApi = {
     getAll: async (params?: {
@@ -803,6 +853,33 @@ export const dishesApi = {
         const endpoint = `/api/v1/dishes${queryString ? `?${queryString}` : ''}`;
         
         return apiCall<DishListResponse>(endpoint, { method: "GET" });
+    },
+
+    create: async (dishData: DishCreateRequest): Promise<DishResponse> => {
+        return apiCall<DishResponse>("/api/v1/dishes/with-ingredients", {
+            method: "POST",
+            body: JSON.stringify(dishData),
+        });
+    },
+
+    uploadImage: async (file: File): Promise<ImageUploadResponse> => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const token = localStorage.getItem('access_token');
+        const response = await fetch(`${getApiBaseUrl()}/api/v1/dishes/upload-image`, {
+            method: "POST",
+            headers: {
+                ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response.json();
     },
 
     getById: async (dishId: number): Promise<DishResponse> => {

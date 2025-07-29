@@ -157,7 +157,7 @@ export default function Profile() {
           </div>
 
           {/* Notifications */}
-          <div className="flex flex-wrap gap-4 items-center mt-2">
+          <div className="flex flex-wrap gap-4 items-centerp mt-2">
             <div className="flex items-center gap-2">
               {profile.email_notifications_enabled ? <Bell className="w-5 h-5 text-green-500" /> : <BellOff className="w-5 h-5 text-gray-400" />}
               <span className="text-green-900 font-medium">Email Notifications: {profile.email_notifications_enabled ? "Enabled" : "Disabled"}</span>

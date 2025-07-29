@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import AnimatedNumber from "@/components/AnimatedNumber";
 import AppHeader from "@/components/AppHeader";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   PieChart,
   Pie,
@@ -440,33 +441,35 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-4 relative z-10">
             {data?.intakes && data.intakes.length > 0 ? (
-              <div className="space-y-3 max-h-80 overflow-y-auto">
-                {data.intakes
-                  .sort((a, b) => new Date(b.intake_time).getTime() - new Date(a.intake_time).getTime())
-                  .map((intake, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-white/70 rounded-2xl backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200">
-                    <div className="flex-1">
-                      <div className="text-sm font-semibold text-purple-900 mb-1">
-                        {intake.dish?.name || "Water"}
-                      </div>
-                      <div className="text-xs text-purple-600 font-medium">
-                        {new Date(intake.intake_time).toLocaleTimeString('en-US', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
-                      </div>
-                      {intake.water_ml && intake.water_ml > 0 && (
-                        <div className="text-xs text-cyan-600 font-medium mt-1">
-                          💧 {intake.water_ml}ml water
+              <ScrollArea className="h-80">
+                <div className="space-y-3 pr-4">
+                  {data.intakes
+                    .sort((a, b) => new Date(b.intake_time).getTime() - new Date(a.intake_time).getTime())
+                    .map((intake, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 bg-white/70 rounded-2xl backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200">
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold text-purple-900 mb-1">
+                          {intake.dish?.name || "Water"}
                         </div>
-                      )}
+                        <div className="text-xs text-purple-600 font-medium">
+                          {new Date(intake.intake_time).toLocaleTimeString('en-US', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
+                        </div>
+                        {intake.water_ml && intake.water_ml > 0 && (
+                          <div className="text-xs text-cyan-600 font-medium mt-1">
+                            💧 {intake.water_ml}ml water
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-sm font-bold text-purple-800 px-3 py-1 bg-purple-100 rounded-full">
+                        {intake.dish ? Math.round(parseFloat(intake.dish?.calories || "0")) : 0} kcal
+                      </div>
                     </div>
-                    <div className="text-sm font-bold text-purple-800 px-3 py-1 bg-purple-100 rounded-full">
-                      {intake.dish ? Math.round(parseFloat(intake.dish?.calories || "0")) : 0} kcal
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </ScrollArea>
             ) : (
               <div className="text-center py-12">
                 <Calendar className="h-16 w-16 text-purple-400 mx-auto mb-4 opacity-50" />

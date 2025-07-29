@@ -1,7 +1,13 @@
 services:
   frontend:
-    build: .
+    build: 
+      context: .
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-}
     container_name: bitewise-frontend
     ports:
       - "3000:80"  # Host port 3000 -> Container port 80 (nginx default)
+    environment:
+      # This can be used for runtime environment detection
+      - NODE_ENV=production
     restart: unless-stopped 

@@ -4,15 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, Plus, User, Droplets, Zap, Activity, Utensils, Clock, Calendar, GlassWater, Sparkles } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import LogIntakeDialog from "@/components/LogIntakeDialog";
 import AnimatedNumber from "@/components/AnimatedNumber";
 import AppHeader from "@/components/AppHeader";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import {
   PieChart,
   Pie,
@@ -103,9 +97,17 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["intakes"] });
     },
     onError: (error: ApiError) => {
-      toast.error("Failed to log water intake", {
-        description: error.message || "Please try again later",
-      });
+      // Don't show technical JSON parsing errors to users
+      const errorMessage = error.message || "Please try again later";
+      const isTechnicalError = errorMessage.includes('JSON') || 
+                              errorMessage.includes('Unexpected end') ||
+                              errorMessage.includes('Failed to execute');
+      
+      if (!isTechnicalError) {
+        toast.error("Failed to log water intake", {
+          description: errorMessage,
+        });
+      }
     },
   });
 
@@ -114,12 +116,22 @@ export default function Dashboard() {
   };
 
   if (error) {
+    const isAuthError = error.status === 401;
+    const errorMessage = isAuthError 
+      ? "Session expired. Redirecting to login..."
+      : error.message || "Failed to load nutritional data";
+    
     return (
       <div className="container py-8">
         <Alert variant="destructive" className="animate-fade-in bg-red-500/20 border-red-500/30">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="text-red-200">
-            Failed to load nutritional data
+            {errorMessage}
+            {!isAuthError && (
+              <div className="mt-2 text-sm text-red-300">
+                Please try refreshing the page or check your internet connection.
+              </div>
+            )}
           </AlertDescription>
         </Alert>
       </div>
@@ -493,9 +505,6 @@ export default function Dashboard() {
                 <Plus className="h-10 w-10 text-orange-600 mb-2 group-hover:scale-110 transition-transform duration-200" />
                 <span className="text-sm font-semibold text-orange-700">Add Snack</span>
               </Button>
-            </div>
-            <div className="text-center">
-              <LogIntakeDialog />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <Button 

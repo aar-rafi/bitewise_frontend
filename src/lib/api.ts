@@ -1,5 +1,28 @@
 // API base URL - this should be configured based on your backend
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const getApiBaseUrl = () => {
+  // Use environment variable if set
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // In production, use the same protocol and domain as the current page
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    
+    // If we're on the production domain, use the same domain with same protocol
+    if (hostname === 'bitewise.twiggle.tech') {
+      return `${protocol}//${hostname}`;
+    }
+    
+    // For localhost development, detect if backend is on different port
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return "http://localhost:8000";
+    }
+  }
+  
+  // Fallback for SSR or unknown environments
+  return "http://localhost:8000";
+};
 
 // API endpoint paths
 const API_ENDPOINTS = {
@@ -23,7 +46,7 @@ export const api = {
             ...options?.headers,
         };
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
             method: 'GET',
             headers,
             ...options,
@@ -44,7 +67,7 @@ export const api = {
             ...options?.headers,
         };
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
             method: 'POST',
             headers,
             body: data ? JSON.stringify(data) : undefined,
@@ -66,7 +89,7 @@ export const api = {
             ...options?.headers,
         };
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
             method: 'PUT',
             headers,
             body: data ? JSON.stringify(data) : undefined,
@@ -88,7 +111,7 @@ export const api = {
             ...options?.headers,
         };
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
             method: 'DELETE',
             headers,
             ...options,
@@ -224,7 +247,7 @@ async function apiCall<T>(
     options: RequestInit = {},
     isRetry: boolean = false // Add a flag to prevent infinite retry loops
 ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
+    const url = `${getApiBaseUrl()}${endpoint}`;
     const accessToken = tokenStorage.getAccessToken();
 
     const defaultHeaders: HeadersInit = {
@@ -247,7 +270,19 @@ async function apiCall<T>(
         const response = await fetch(url, config);
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
+            // Safely parse error data - handle empty responses
+            let errorData: any = {};
+            try {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const text = await response.text();
+                    if (text.trim()) {
+                        errorData = JSON.parse(text);
+                    }
+                }
+            } catch (parseError) {
+                console.warn('Failed to parse error response as JSON:', parseError);
+            }
 
             // Don't try to refresh tokens for logout endpoint to prevent infinite loops
             if (response.status === 401 && !isRetry && endpoint !== API_ENDPOINTS.LOGOUT) {
@@ -431,7 +466,7 @@ export const authApi = {
             // Call backend to invalidate refresh tokens - but don't use apiCall to avoid infinite loops
             const token = localStorage.getItem('access_token');
             if (token) {
-                await fetch(`${API_BASE_URL}${API_ENDPOINTS.LOGOUT}`, {
+                await fetch(`${getApiBaseUrl()}${API_ENDPOINTS.LOGOUT}`, {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json',
@@ -625,7 +660,7 @@ export const profileApi = {
         const formData = new FormData();
         formData.append("image", file);
         
-        const response = await fetch(`${API_BASE_URL}/api/v1/profile/me/profile-picture`, {
+        const response = await fetch(`${getApiBaseUrl()}/api/v1/profile/me/profile-picture`, {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${tokenStorage.getAccessToken()}`,

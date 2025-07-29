@@ -59,9 +59,17 @@ export default function LogIntakeDialog() {
       form.reset();
     },
     onError: (error: ApiError) => {
-      toast.error("Failed to log intake", {
-        description: error.message,
-      });
+      // Don't show technical JSON parsing errors to users
+      const errorMessage = error.message || "Please try again later";
+      const isTechnicalError = errorMessage.includes('JSON') || 
+                              errorMessage.includes('Unexpected end') ||
+                              errorMessage.includes('Failed to execute');
+      
+      if (!isTechnicalError) {
+        toast.error("Failed to log intake", {
+          description: errorMessage,
+        });
+      }
     },
   });
 

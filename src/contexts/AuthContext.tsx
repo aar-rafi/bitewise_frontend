@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { tokenStorage, authApi } from '@/lib/api';
 import { jwtUtils } from '@/lib/auth';
 import { toast } from 'sonner';
+import { authInterceptor } from '@/lib/authInterceptor';
 
 interface User {
   id: string;
@@ -18,6 +19,7 @@ interface AuthContextType {
   login: (userData: User, tokens: { access_token: string; refresh_token: string; expires_in: number }) => void;
   logout: () => Promise<void>;
   checkAuthStatus: () => boolean;
+  clearAuth: () => void; // New method for clearing auth without API call
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,6 +46,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return !!token && !jwtUtils.isExpired(token);
   };
 
+  const clearAuth = () => {
+    setUser(null);
+    localStorage.removeItem('user_data');
+    tokenStorage.clearTokens();
+  };
+
   const login = (userData: User, tokens: { access_token: string; refresh_token: string; expires_in: number }) => {
     // Store tokens
     tokenStorage.setTokens(tokens.access_token, tokens.refresh_token, tokens.expires_in);
@@ -67,8 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     
     // Clear user data
-    setUser(null);
-    localStorage.removeItem('user_data');
+    clearAuth();
     
     // Show logout message
     toast.success('Logged out successfully');
@@ -114,15 +121,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       } else {
         // Clear invalid/expired tokens
-        tokenStorage.clearTokens();
-        localStorage.removeItem('user_data');
+        clearAuth();
       }
       
       setIsLoading(false);
     };
 
+    // Configure auth interceptor to use this context's clearAuth method
+    authInterceptor.configure({
+      onAuthFailure: () => {
+        clearAuth();
+        navigate('/', { replace: true });
+      }
+    });
+
     initAuth();
-  }, []);
+  }, [navigate]);
 
   const value: AuthContextType = {
     user,
@@ -131,6 +145,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     logout,
     checkAuthStatus,
+    clearAuth,
   };
 
   return (

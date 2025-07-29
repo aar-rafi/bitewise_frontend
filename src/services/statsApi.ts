@@ -1,7 +1,32 @@
 import { authApi } from '@/lib/api';
 
 // Import the existing API infrastructure
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const getApiBaseUrl = () => {
+  // Use environment variable if set
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // In production, use the same protocol and domain as the current page
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    
+    // If we're on the production domain, use the same domain with same protocol
+    if (hostname === 'bitewise.twiggle.tech') {
+      return `${protocol}//${hostname}`;
+    }
+    
+    // For localhost development, detect if backend is on different port
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return "http://localhost:8000";
+    }
+  }
+  
+  // Fallback for SSR or unknown environments
+  return "http://localhost:8000";
+};
+
+// Remove the constant evaluation - will be called at runtime instead
 
 // Time unit types for statistics API
 export type TimeUnit = 'hour' | 'day' | 'week' | 'month' | 'year';
@@ -227,7 +252,7 @@ async function statsApiCall<T>(
     endpoint: string,
     options: RequestInit = {}
 ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
+    const url = `${getApiBaseUrl()}${endpoint}`;
 
     // Get access token from localStorage
     const accessToken = localStorage.getItem("access_token");

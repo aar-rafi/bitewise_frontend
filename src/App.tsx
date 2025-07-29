@@ -10,6 +10,8 @@ import { useTokenHandler } from "@/hooks/useTokenHandler";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PublicRoute from "@/components/PublicRoute";
+import { toast } from "sonner";
+import { tokenStorage } from "@/lib/api";
 
 // Lazy load route components for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -26,7 +28,33 @@ const ProfileUpdate = lazy(() => import("./pages/ProfileUpdate"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+// Create QueryClient with global error handling for authentication
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        // Don't retry 401 errors (authentication failures)
+        if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
+          return false;
+        }
+        // Retry other errors up to 2 times
+        return failureCount < 2;
+      },
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+    mutations: {
+      retry: (failureCount, error) => {
+        // Don't retry 401 errors
+        if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
+          return false;
+        }
+        return failureCount < 1;
+      },
+      // Remove global mutation error handler - let individual mutations handle their own errors
+    },
+  },
+});
 
 // Loading component for lazy routes
 const RouteLoader = () => (

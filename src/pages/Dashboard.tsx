@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import AnimatedNumber from "@/components/AnimatedNumber";
 import AppHeader from "@/components/AppHeader";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { AddDishModal } from "@/components/AddDishModal";
 import {
   PieChart,
   Pie,
@@ -489,38 +490,28 @@ export default function Dashboard() {
               Quick Add
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-8 relative z-10">
-            <div className="grid grid-cols-2 gap-6">
-              <Button 
-                variant="outline" 
-                className="h-24 flex flex-col items-center justify-center border-2 border-dashed border-orange-300 hover:border-orange-400 hover:bg-orange-50 rounded-2xl transition-all duration-200 group"
-              >
-                <Plus className="h-10 w-10 text-orange-600 mb-2 group-hover:scale-110 transition-transform duration-200" />
-                <span className="text-sm font-semibold text-orange-700">Add Meal</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                className="h-24 flex flex-col items-center justify-center border-2 border-dashed border-orange-300 hover:border-orange-400 hover:bg-orange-50 rounded-2xl transition-all duration-200 group"
-              >
-                <Plus className="h-10 w-10 text-orange-600 mb-2 group-hover:scale-110 transition-transform duration-200" />
-                <span className="text-sm font-semibold text-orange-700">Add Snack</span>
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 rounded-xl font-semibold transition-all duration-200 h-12"
-              >
-                Search Recipes
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 rounded-xl font-semibold transition-all duration-200 h-12"
-              >
-                Scan Barcode
-              </Button>
+          <CardContent className="space-y-8 relative z-10 flex items-center justify-center h-full">
+            {/* Add Your Own Dish - Full Width */}
+            <div className="w-full">
+              <AddDishModal
+                trigger={
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-32 border-2 border-dashed border-orange-400 hover:border-orange-500 hover:bg-orange-50 rounded-3xl transition-all duration-200 group bg-gradient-to-br from-orange-50 to-amber-50 hover:shadow-lg"
+                  >
+                    <div className="flex flex-col items-center space-y-3">
+                      <Sparkles className="h-12 w-12 text-orange-600 mb-2 group-hover:scale-110 transition-transform duration-200" />
+                      <div className="text-center">
+                        <span className="text-xl font-bold text-orange-700 block">Add Your Own Dish</span>
+                        <span className="text-sm text-orange-600 mt-1">Create custom recipe with ingredients</span>
+                      </div>
+                    </div>
+                  </Button>
+                }
+                onDishCreated={() => {
+                  toast.success("Your dish has been added to the database!");
+                }}
+              />
             </div>
           </CardContent>
         </Card>
